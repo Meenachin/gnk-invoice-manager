@@ -30,9 +30,7 @@ export async function GET(
 
     const pdf = await buildInvoicePdf(inv);
 
-    return new NextResponse(
-      pdf as unknown as BodyInit,
-      {
+    return new NextResponse(pdf as unknown as BodyInit,{
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
