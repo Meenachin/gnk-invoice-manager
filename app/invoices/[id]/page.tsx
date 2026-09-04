@@ -1,2 +1,15 @@
 import InvoiceEditor from '@/components/InvoiceEditor';
-export default function EditInvoice({params}:{params:{id:string}}){return <main className="container"><InvoiceEditor id={params.id} /></main>}
+
+export default async function InvoicePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return (
+    <main>
+      <InvoiceEditor id={id} />
+    </main>
+  );
+}
