@@ -1,0 +1,28 @@
+{
+  "name": "gnk-invoice-manager",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "engines": { "node": ">=20.0.0" },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "docx": "^9.5.1",
+    "next": "^14.2.31",
+    "pdfkit": "^0.17.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.11",
+    "@types/pdfkit": "^0.13.8",
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
+    "typescript": "^5.9.2"
+  }
+}
