@@ -1,5 +1,1307 @@
 'use client';
-import {useEffect,useMemo,useState} from 'react'; import Link from 'next/link'; import InvoicePreview from './InvoicePreview'; import {Invoice,InvoiceInput,LineItem} from '@/lib/types'; import {calculateTotals} from '@/lib/invoice';
-const blank=(type:'catering'|'housekeeping'):InvoiceInput=>({invoiceType:type,invoiceNo:'',invoiceDate:new Date().toISOString().slice(0,10),periodFrom:type==='housekeeping'?'2026-05-01':null,periodTo:type==='housekeeping'?'2026-05-31':null,workDescription:type==='housekeeping'?'Housekeeping and maintenance works':'',billToName:type==='catering'?'OAD DEPT':'The Asst. General Manager, Estate and premises Department, State bank of India, Koti, Hyderabad',billToAddress:type==='catering'?'SBI LHO KOTI\nHYDERBAD':'State bank of India, Koti, Hyderabad, Telangana state',billToGstin:type==='catering'?'36AAACS8577KIZQ':'36AAACS8577K1ZQ',billToState:'Telangana, Code : 36',billDescription:type==='catering'?'Bill for providing catering services at VIP MESS SBI LHO KOTI for the month of AUG-26':'Bill For providing housekeeping, catering services at SBI GUEST HOUSE, DWARAKAPURI COLONY, Hyderabad, for the month of MAY 2026',lineItems:type==='catering'?[{description:'LUNCH',quantity:270,rate:300,per:'',hsnSac:''},{description:'TEA/COFFEE',quantity:5031,rate:25,per:'',hsnSac:''},{description:'SNACKS',quantity:538,rate:60,per:'',hsnSac:''},{description:'SPL LUNCH',quantity:236,rate:800,per:'',hsnSac:''}]:[{description:'Bill For providing housekeeping, catering services at SBI GUEST HOUSE, DWARAKAPURI COLONY, Hyderabad, for the month of MAY 2026',quantity:1,rate:271836.21,per:'Quantity',hsnSac:'998533'}],cgstRate:type==='catering'?2.5:9,sgstRate:type==='catering'?2.5:9});
-function withTotals(input:InvoiceInput):Invoice{const t=calculateTotals(input.lineItems,input.cgstRate,input.sgstRate);return {...input,id:'preview',...t};}
-export default function InvoiceEditor({id,type='catering'}:{id?:string,type?:'catering'|'housekeeping'}){const [form,setForm]=useState<InvoiceInput>(blank(type)); const [loading,setLoading]=useState(!!id); const [saving,setSaving]=useState(false); const [msg,setMsg]=useState(''); useEffect(()=>{if(id)fetch('/api/invoices/'+id).then(r=>r.json()).then(x=>{if(x.invoice){const i=x.invoice;setForm({invoiceType:i.invoice_type,invoiceNo:i.invoice_no,invoiceDate:i.invoice_date?.slice(0,10),periodFrom:i.period_from?.slice(0,10)||null,periodTo:i.period_to?.slice(0,10)||null,workDescription:i.work_description||'',billToName:i.bill_to_name,billToAddress:i.bill_to_address||'',billToGstin:i.bill_to_gstin||'',billToState:i.bill_to_state||'',billDescription:i.bill_description||'',lineItems:i.line_items||[],cgstRate:Number(i.tax_cgst?0: i.invoice_type==='catering'?2.5:9),sgstRate:Number(i.tax_sgst?0:i.invoice_type==='catering'?2.5:9)});setForm(f=>({...f,cgstRate:i.invoice_type==='catering'?2.5:9,sgstRate:i.invoice_type==='catering'?2.5:9}))}}).finally(()=>setLoading(false))},[id]); const inv=useMemo(()=>withTotals(form),[form]); const set=(k:keyof InvoiceInput,v:any)=>setForm(f=>({...f,[k]:v})); const setItem=(idx:number,k:keyof LineItem,v:any)=>set('lineItems',form.lineItems.map((x,i)=>i===idx?{...x,[k]:k==='quantity'||k==='rate'?Number(v):v}:x)); const save=async()=>{setSaving(true);setMsg('');try{const res=await fetch(id?'/api/invoices/'+id:'/api/invoices',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});const j=await res.json();if(!res.ok)throw new Error(j.error||'Could not save');setMsg('Saved successfully.');if(!id&&j.invoice?.id)window.location.href='/invoices/'+j.invoice.id}catch(e:any){setMsg(e.message)}finally{setSaving(false)}}; if(loading)return <div>Loading...</div>;return <><div className="toolbar no-print"><div><h1 style={{margin:0}}>{id?'View / Edit':'New'} {form.invoiceType==='catering'?'Catering':'Housekeeping'} Invoice</h1></div><div className="actions"><Link className="btn secondary" href="/invoices">Back</Link>{id&&<><a className="btn secondary" href={`/api/invoices/${id}/pdf`} target="_blank">PDF</a><a className="btn secondary" href={`/api/invoices/${id}/docx`}>DOCX</a><button className="btn secondary" onClick={()=>window.print()}>Print</button></>}<button className="btn" onClick={save} disabled={saving}>{saving?'Saving...':'Save Invoice'}</button></div></div>{msg&&<div className={msg==='Saved successfully.'?'success':'error'}>{msg}</div>}<div className="form-grid no-print"><div className="panel"><h3>Invoice Details</h3><div className="field"><label>Invoice No *</label><input value={form.invoiceNo} onChange={e=>set('invoiceNo',e.target.value)} placeholder={form.invoiceType==='catering'?'SBI/AUG26/A1':'GNK/JUN26/DW2'}/></div><div className="field"><label>Invoice Date *</label><input type="date" value={form.invoiceDate} onChange={e=>set('invoiceDate',e.target.value)}/></div>{form.invoiceType==='housekeeping'&&<><div className="field"><label>Description of Work</label><input value={form.workDescription||''} onChange={e=>set('workDescription',e.target.value)}/></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}><div className="field"><label>Period From</label><input type="date" value={form.periodFrom||''} onChange={e=>set('periodFrom',e.target.value)}/></div><div className="field"><label>Period To</label><input type="date" value={form.periodTo||''} onChange={e=>set('periodTo',e.target.value)}/></div></div></>}</div><div className="panel"><h3>Bill To</h3><div className="field"><label>Buyer Name</label><textarea value={form.billToName} onChange={e=>set('billToName',e.target.value)}/></div><div className="field"><label>Address</label><textarea value={form.billToAddress||''} onChange={e=>set('billToAddress',e.target.value)}/></div><div className="field"><label>GSTIN / UIN</label><input value={form.billToGstin||''} onChange={e=>set('billToGstin',e.target.value)}/></div><div className="field"><label>State</label><input value={form.billToState||''} onChange={e=>set('billToState',e.target.value)}/></div></div><div className="panel full"><h3>Bill Description</h3><div className="field"><textarea value={form.billDescription||''} onChange={e=>set('billDescription',e.target.value)} /></div></div><div className="panel full"><div className="toolbar"><h3 style={{margin:0}}>Line Items</h3><button className="btn secondary" onClick={()=>set('lineItems',[...form.lineItems,{description:'',quantity:1,rate:0,per:'',hsnSac:form.invoiceType==='housekeeping'?'998533':''}])}>+ Add Line</button></div><div className="table-wrap"><table className="items"><thead><tr><th>#</th><th>Description</th><th>HSN/SAC</th><th>Quantity</th><th>Rate</th><th>Per</th><th>Amount</th><th></th></tr></thead><tbody>{form.lineItems.map((x,n)=><tr key={n}><td>{n+1}</td><td><input value={x.description} onChange={e=>setItem(n,'description',e.target.value)}/></td><td><input value={x.hsnSac||''} onChange={e=>setItem(n,'hsnSac',e.target.value)}/></td><td><input type="number" min="0" value={x.quantity} onChange={e=>setItem(n,'quantity',e.target.value)}/></td><td><input type="number" min="0" step="0.01" value={x.rate} onChange={e=>setItem(n,'rate',e.target.value)}/></td><td><input value={x.per||''} onChange={e=>setItem(n,'per',e.target.value)}/></td><td style={{textAlign:'right'}}>₹ {((x.quantity||0)*(x.rate||0)).toLocaleString('en-IN',{minimumFractionDigits:2})}</td><td><button className="btn danger" onClick={()=>set('lineItems',form.lineItems.filter((_,i)=>i!==n))}>×</button></td></tr>)}</tbody></table></div></div><div className="panel"><h3>Taxes</h3><div className="field"><label>CGST %</label><input type="number" step="0.01" value={form.cgstRate} onChange={e=>set('cgstRate',Number(e.target.value))}/></div><div className="field"><label>SGST %</label><input type="number" step="0.01" value={form.sgstRate} onChange={e=>set('sgstRate',Number(e.target.value))}/></div></div><div className="panel"><h3>Calculated Total</h3><p>Subtotal: <b>₹ {inv.subtotal.toLocaleString('en-IN',{minimumFractionDigits:2})}</b></p><p>CGST: <b>₹ {inv.taxCgst.toLocaleString('en-IN',{minimumFractionDigits:2})}</b></p><p>SGST: <b>₹ {inv.taxSgst.toLocaleString('en-IN',{minimumFractionDigits:2})}</b></p><h2>₹ {inv.grandTotal.toLocaleString('en-IN',{minimumFractionDigits:2})}</h2></div></div><section style={{marginTop:25}}><div className="toolbar no-print"><h2 style={{margin:0}}>Live Output Preview</h2></div><div className="preview-shell"><InvoicePreview invoice={inv}/></div></section></>}
+
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+
+import InvoicePreview from './InvoicePreview';
+import { Invoice, InvoiceInput, LineItem } from '@/lib/types';
+import { calculateTotals } from '@/lib/invoice';
+
+type Props = {
+  id?: string;
+  type?: 'catering' | 'housekeeping';
+};
+
+const companyDefaults = {
+  phone: '9701055662',
+  gstin: '36BMTPG2251D1Z6',
+  hkCode: '00440318',
+};
+
+function createBlankInvoice(
+  type: 'catering' | 'housekeeping'
+): InvoiceInput {
+  return {
+    invoiceType: type,
+    invoiceNo: '',
+    invoiceDate: new Date().toISOString().slice(0, 10),
+
+    periodFrom: type === 'housekeeping' ? '' : null,
+    periodTo: type === 'housekeeping' ? '' : null,
+
+    workDescription:
+      type === 'housekeeping'
+        ? 'Housekeeping and maintenance works'
+        : '',
+
+    billToName: '',
+    billToAddress: '',
+    billToGstin: '',
+    billToState: 'Telangana, Code : 36',
+
+    billDescription: '',
+
+    lineItems: [
+      {
+        description: '',
+        quantity: 1,
+        rate: 0,
+        per: 'Quantity',
+        hsnSac: type === 'housekeeping' ? '998533' : '',
+      },
+    ],
+
+    cgstRate: type === 'catering' ? 2.5 : 9,
+    sgstRate: type === 'catering' ? 2.5 : 9,
+  };
+}
+
+function calculateInvoice(input: InvoiceInput): Invoice {
+  const totals = calculateTotals(
+    input.lineItems,
+    input.cgstRate,
+    input.sgstRate
+  );
+
+  return {
+    ...input,
+    id: 'preview',
+    ...totals,
+  };
+}
+
+function formatMoney(value: number) {
+  return `₹ ${Number(value || 0).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return '-';
+
+  const parts = String(value).slice(0, 10).split('-');
+
+  if (parts.length !== 3) return value;
+
+  return `${parts[2]}-${parts[1]}-${parts[0]}`;
+}
+
+export default function InvoiceEditor({
+  id,
+  type = 'catering',
+}: Props) {
+  const [form, setForm] = useState<InvoiceInput>(
+    createBlankInvoice(type)
+  );
+
+  const [loading, setLoading] = useState(Boolean(id));
+  const [editing, setEditing] = useState(!id);
+  const [saving, setSaving] = useState(false);
+
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const invoice = useMemo(
+    () => calculateInvoice(form),
+    [form]
+  );
+
+  useEffect(() => {
+    if (!id) return;
+
+    let cancelled = false;
+
+    async function loadInvoice() {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await fetch(
+          `/api/invoices/${id}`,
+          {
+            cache: 'no-store',
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error || 'Unable to load invoice'
+          );
+        }
+
+        if (!data.invoice) {
+          throw new Error('Invoice not found');
+        }
+
+        const item = data.invoice;
+
+        if (cancelled) return;
+
+        const invoiceType =
+          item.invoice_type === 'housekeeping'
+            ? 'housekeeping'
+            : 'catering';
+
+        setForm({
+          invoiceType,
+          invoiceNo: item.invoice_no || '',
+          invoiceDate: String(item.invoice_date || '').slice(
+            0,
+            10
+          ),
+
+          periodFrom: item.period_from
+            ? String(item.period_from).slice(0, 10)
+            : null,
+
+          periodTo: item.period_to
+            ? String(item.period_to).slice(0, 10)
+            : null,
+
+          workDescription:
+            item.work_description || '',
+
+          billToName:
+            item.bill_to_name || '',
+
+          billToAddress:
+            item.bill_to_address || '',
+
+          billToGstin:
+            item.bill_to_gstin || '',
+
+          billToState:
+            item.bill_to_state || '',
+
+          billDescription:
+            item.bill_description || '',
+
+          lineItems: Array.isArray(item.line_items)
+            ? item.line_items.map((line: any) => ({
+                description: line.description || '',
+                quantity: Number(line.quantity || 0),
+                rate: Number(line.rate || 0),
+                per: line.per || '',
+                hsnSac: line.hsnSac || '',
+              }))
+            : [],
+
+          cgstRate:
+            invoiceType === 'catering'
+              ? 2.5
+              : 9,
+
+          sgstRate:
+            invoiceType === 'catering'
+              ? 2.5
+              : 9,
+        });
+      } catch (err: any) {
+        if (!cancelled) {
+          setError(
+            err?.message || 'Unable to load invoice'
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadInvoice();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  function updateField<K extends keyof InvoiceInput>(
+    key: K,
+    value: InvoiceInput[K]
+  ) {
+    setForm((current) => ({
+      ...current,
+      [key]: value,
+    }));
+
+    setMessage('');
+    setError('');
+  }
+
+  function updateLine(
+    index: number,
+    key: keyof LineItem,
+    value: string
+  ) {
+    setForm((current) => ({
+      ...current,
+
+      lineItems: current.lineItems.map(
+        (item, itemIndex) => {
+          if (itemIndex !== index) {
+            return item;
+          }
+
+          if (
+            key === 'quantity' ||
+            key === 'rate'
+          ) {
+            return {
+              ...item,
+              [key]:
+                value === ''
+                  ? 0
+                  : Number(value),
+            };
+          }
+
+          return {
+            ...item,
+            [key]: value,
+          };
+        }
+      ),
+    }));
+
+    setMessage('');
+    setError('');
+  }
+
+  function addLine() {
+    setForm((current) => ({
+      ...current,
+
+      lineItems: [
+        ...current.lineItems,
+
+        {
+          description: '',
+          quantity: 1,
+          rate: 0,
+          per: 'Quantity',
+          hsnSac:
+            current.invoiceType === 'housekeeping'
+              ? '998533'
+              : '',
+        },
+      ],
+    }));
+  }
+
+  function removeLine(index: number) {
+    if (form.lineItems.length === 1) {
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+
+      lineItems: current.lineItems.filter(
+        (_, itemIndex) =>
+          itemIndex !== index
+      ),
+    }));
+  }
+
+  async function saveInvoice() {
+    setSaving(true);
+    setMessage('');
+    setError('');
+
+    try {
+      if (!form.invoiceNo.trim()) {
+        throw new Error(
+          'Invoice number is required.'
+        );
+      }
+
+      if (!form.invoiceDate) {
+        throw new Error(
+          'Invoice date is required.'
+        );
+      }
+
+      if (!form.billToName.trim()) {
+        throw new Error(
+          'Buyer name is required.'
+        );
+      }
+
+      if (form.lineItems.length === 0) {
+        throw new Error(
+          'Add at least one line item.'
+        );
+      }
+
+      const response = await fetch(
+        id
+          ? `/api/invoices/${id}`
+          : '/api/invoices',
+        {
+          method: id ? 'PUT' : 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          body: JSON.stringify(form),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data?.error === 'string'
+            ? data.error
+            : 'Unable to save invoice.'
+        );
+      }
+
+      setMessage(
+        id
+          ? 'Invoice updated successfully.'
+          : 'Invoice created successfully.'
+      );
+
+      setEditing(false);
+
+      if (!id && data?.invoice?.id) {
+        window.location.href =
+          `/invoices/${data.invoice.id}`;
+      }
+    } catch (err: any) {
+      setError(
+        err?.message ||
+          'Unable to save invoice.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="invoice-loading">
+        <div className="loading-spinner" />
+        <h3>Loading invoice...</h3>
+        <p>Please wait while we load the saved invoice.</p>
+      </div>
+    );
+  }
+
+  if (error && !form.invoiceNo) {
+    return (
+      <div className="invoice-error-page">
+        <h2>Unable to load invoice</h2>
+        <p>{error}</p>
+
+        <Link
+          href="/invoices"
+          className="btn"
+        >
+          Back to Invoices
+        </Link>
+      </div>
+    );
+  }
+
+  const isHousekeeping =
+    form.invoiceType === 'housekeeping';
+
+  return (
+    <div className="invoice-page">
+
+      {/* HEADER */}
+      <div className="invoice-page-header">
+
+        <div className="header-left">
+
+          <Link
+            href="/invoices"
+            className="back-link"
+          >
+            ← Invoices
+          </Link>
+
+          <div className="title-row">
+
+            <div>
+              <div className="eyebrow">
+                GNK INVOICE MANAGER
+              </div>
+
+              <h1>
+                {isHousekeeping
+                  ? 'Housekeeping Invoice'
+                  : 'Catering Invoice'}
+              </h1>
+
+              <p>
+                {id
+                  ? `Invoice ${form.invoiceNo || '—'}`
+                  : 'Create a new invoice'}
+              </p>
+            </div>
+
+            <span
+              className={
+                editing
+                  ? 'status-badge editing'
+                  : 'status-badge saved'
+              }
+            >
+              {editing
+                ? 'Editing'
+                : 'Saved'}
+            </span>
+
+          </div>
+
+        </div>
+
+        <div className="header-actions">
+
+          {!editing && id && (
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                setEditing(true);
+                setMessage('');
+                setError('');
+              }}
+            >
+              ✎ Edit Invoice
+            </button>
+          )}
+
+          {id && (
+            <>
+              <a
+                className="btn secondary"
+                href={`/api/invoices/${id}/pdf`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                PDF
+              </a>
+
+              <a
+                className="btn secondary"
+                href={`/api/invoices/${id}/docx`}
+              >
+                DOCX
+              </a>
+
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => window.print()}
+              >
+                Print
+              </button>
+            </>
+          )}
+
+        </div>
+
+      </div>
+
+      {/* MESSAGE */}
+      {message && (
+        <div className="alert success-alert">
+          <span>✓</span>
+          {message}
+        </div>
+      )}
+
+      {error && (
+        <div className="alert error-alert">
+          <span>!</span>
+          {error}
+        </div>
+      )}
+
+      {/* EDIT MODE */}
+      {editing ? (
+        <div className="editor-layout">
+
+          <div className="editor-column">
+
+            {/* INVOICE DETAILS */}
+            <section className="editor-card">
+
+              <div className="card-heading">
+                <div>
+                  <span className="section-number">
+                    01
+                  </span>
+
+                  <div>
+                    <h2>Invoice Details</h2>
+                    <p>
+                      Basic information for this invoice
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="field-grid">
+
+                <div className="field">
+                  <label>
+                    Invoice Number
+                    <span>*</span>
+                  </label>
+
+                  <input
+                    value={form.invoiceNo}
+                    onChange={(e) =>
+                      updateField(
+                        'invoiceNo',
+                        e.target.value
+                      )
+                    }
+                    placeholder={
+                      isHousekeeping
+                        ? 'GNK/JUN26/DW2'
+                        : 'SBI/AUG26/A1'
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label>
+                    Invoice Date
+                    <span>*</span>
+                  </label>
+
+                  <input
+                    type="date"
+                    value={form.invoiceDate}
+                    onChange={(e) =>
+                      updateField(
+                        'invoiceDate',
+                        e.target.value
+                      )
+                    }
+                  />
+                </div>
+
+              </div>
+
+              {isHousekeeping && (
+                <>
+                  <div className="field">
+                    <label>
+                      Description of Work
+                    </label>
+
+                    <input
+                      value={
+                        form.workDescription || ''
+                      }
+                      onChange={(e) =>
+                        updateField(
+                          'workDescription',
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div className="field-grid">
+
+                    <div className="field">
+                      <label>
+                        Period From
+                      </label>
+
+                      <input
+                        type="date"
+                        value={
+                          form.periodFrom || ''
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            'periodFrom',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div className="field">
+                      <label>
+                        Period To
+                      </label>
+
+                      <input
+                        type="date"
+                        value={
+                          form.periodTo || ''
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            'periodTo',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+
+                  </div>
+                </>
+              )}
+
+            </section>
+
+            {/* BUYER */}
+            <section className="editor-card">
+
+              <div className="card-heading">
+                <div>
+                  <span className="section-number">
+                    02
+                  </span>
+
+                  <div>
+                    <h2>Buyer Information</h2>
+                    <p>
+                      Customer information printed on the invoice
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="field">
+
+                <label>
+                  Buyer Name
+                  <span>*</span>
+                </label>
+
+                <textarea
+                  rows={3}
+                  value={form.billToName}
+                  onChange={(e) =>
+                    updateField(
+                      'billToName',
+                      e.target.value
+                    )
+                  }
+                />
+
+              </div>
+
+              <div className="field">
+
+                <label>
+                  Buyer Address
+                </label>
+
+                <textarea
+                  rows={4}
+                  value={
+                    form.billToAddress || ''
+                  }
+                  onChange={(e) =>
+                    updateField(
+                      'billToAddress',
+                      e.target.value
+                    )
+                  }
+                />
+
+              </div>
+
+              <div className="field-grid">
+
+                <div className="field">
+
+                  <label>
+                    GSTIN / UIN
+                  </label>
+
+                  <input
+                    value={
+                      form.billToGstin || ''
+                    }
+                    onChange={(e) =>
+                      updateField(
+                        'billToGstin',
+                        e.target.value
+                      )
+                    }
+                  />
+
+                </div>
+
+                <div className="field">
+
+                  <label>
+                    State
+                  </label>
+
+                  <input
+                    value={
+                      form.billToState || ''
+                    }
+                    onChange={(e) =>
+                      updateField(
+                        'billToState',
+                        e.target.value
+                      )
+                    }
+                  />
+
+                </div>
+
+              </div>
+
+            </section>
+
+            {/* BILL DESCRIPTION */}
+            <section className="editor-card">
+
+              <div className="card-heading">
+                <div>
+                  <span className="section-number">
+                    03
+                  </span>
+
+                  <div>
+                    <h2>Bill Description</h2>
+                    <p>
+                      Description shown in the invoice
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="field">
+
+                <textarea
+                  rows={5}
+                  value={
+                    form.billDescription || ''
+                  }
+                  onChange={(e) =>
+                    updateField(
+                      'billDescription',
+                      e.target.value
+                    )
+                  }
+                  placeholder="Enter bill description..."
+                />
+
+              </div>
+
+            </section>
+
+            {/* ITEMS */}
+            <section className="editor-card">
+
+              <div className="card-heading items-heading">
+
+                <div>
+                  <span className="section-number">
+                    04
+                  </span>
+
+                  <div>
+                    <h2>Line Items</h2>
+                    <p>
+                      Add services or products included in this invoice
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={addLine}
+                >
+                  + Add Item
+                </button>
+
+              </div>
+
+              <div className="items-editor">
+
+                <div className="items-header">
+                  <span>#</span>
+                  <span>Description</span>
+                  <span>HSN/SAC</span>
+                  <span>Qty</span>
+                  <span>Rate</span>
+                  <span>Per</span>
+                  <span>Amount</span>
+                  <span />
+                </div>
+
+                {form.lineItems.map(
+                  (item, index) => {
+
+                    const amount =
+                      Number(item.quantity || 0) *
+                      Number(item.rate || 0);
+
+                    return (
+                      <div
+                        className="item-row"
+                        key={index}
+                      >
+
+                        <div className="item-number">
+                          {index + 1}
+                        </div>
+
+                        <input
+                          value={
+                            item.description
+                          }
+                          onChange={(e) =>
+                            updateLine(
+                              index,
+                              'description',
+                              e.target.value
+                            )
+                          }
+                          placeholder="Description"
+                        />
+
+                        <input
+                          value={
+                            item.hsnSac || ''
+                          }
+                          onChange={(e) =>
+                            updateLine(
+                              index,
+                              'hsnSac',
+                              e.target.value
+                            )
+                          }
+                          placeholder="HSN/SAC"
+                        />
+
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={
+                            item.quantity
+                          }
+                          onChange={(e) =>
+                            updateLine(
+                              index,
+                              'quantity',
+                              e.target.value
+                            )
+                          }
+                        />
+
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={
+                            item.rate
+                          }
+                          onChange={(e) =>
+                            updateLine(
+                              index,
+                              'rate',
+                              e.target.value
+                            )
+                          }
+                        />
+
+                        <input
+                          value={
+                            item.per || ''
+                          }
+                          onChange={(e) =>
+                            updateLine(
+                              index,
+                              'per',
+                              e.target.value
+                            )
+                          }
+                          placeholder="Per"
+                        />
+
+                        <div className="item-amount">
+                          {formatMoney(amount)}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="remove-item"
+                          onClick={() =>
+                            removeLine(index)
+                          }
+                          title="Remove item"
+                          disabled={
+                            form.lineItems.length ===
+                            1
+                          }
+                        >
+                          ×
+                        </button>
+
+                      </div>
+                    );
+                  }
+                )}
+
+              </div>
+
+            </section>
+
+            {/* TAX */}
+            <section className="editor-card">
+
+              <div className="card-heading">
+                <div>
+                  <span className="section-number">
+                    05
+                  </span>
+
+                  <div>
+                    <h2>Tax & Totals</h2>
+                    <p>
+                      Tax rates and automatically calculated totals
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="tax-grid">
+
+                <div className="tax-field">
+
+                  <label>CGST</label>
+
+                  <div className="tax-input">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={
+                        form.cgstRate
+                      }
+                      onChange={(e) =>
+                        updateField(
+                          'cgstRate',
+                          Number(
+                            e.target.value
+                          )
+                        )
+                      }
+                    />
+                    <span>%</span>
+                  </div>
+
+                </div>
+
+                <div className="tax-field">
+
+                  <label>SGST</label>
+
+                  <div className="tax-input">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={
+                        form.sgstRate
+                      }
+                      onChange={(e) =>
+                        updateField(
+                          'sgstRate',
+                          Number(
+                            e.target.value
+                          )
+                        )
+                      }
+                    />
+                    <span>%</span>
+                  </div>
+
+                </div>
+
+                <div className="totals-box">
+
+                  <div>
+                    <span>Subtotal</span>
+                    <strong>
+                      {formatMoney(
+                        invoice.subtotal
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      CGST {form.cgstRate}%
+                    </span>
+                    <strong>
+                      {formatMoney(
+                        invoice.taxCgst
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      SGST {form.sgstRate}%
+                    </span>
+                    <strong>
+                      {formatMoney(
+                        invoice.taxSgst
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="grand-total">
+                    <span>Grand Total</span>
+                    <strong>
+                      {formatMoney(
+                        invoice.grandTotal
+                      )}
+                    </strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </section>
+
+            {/* SAVE BAR */}
+            <div className="save-bar">
+
+              <div>
+                <strong>
+                  {id
+                    ? 'Update this invoice'
+                    : 'Create invoice'}
+                </strong>
+
+                <span>
+                  All calculated amounts will be saved automatically.
+                </span>
+              </div>
+
+              <div className="save-actions">
+
+                {id && (
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => {
+                      setEditing(false);
+                      setError('');
+                      setMessage('');
+                    }}
+                  >
+                    Cancel
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="btn primary large"
+                  onClick={saveInvoice}
+                  disabled={saving}
+                >
+                  {saving
+                    ? 'Saving...'
+                    : id
+                    ? '✓ Update Invoice'
+                    : '✓ Create Invoice'}
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* LIVE PREVIEW */}
+          <aside className="preview-column">
+
+            <div className="preview-sticky">
+
+              <div className="preview-heading">
+
+                <div>
+                  <span>
+                    LIVE PREVIEW
+                  </span>
+
+                  <h2>
+                    Final Invoice
+                  </h2>
+                </div>
+
+                <span className="preview-dot">
+                  Live
+                </span>
+
+              </div>
+
+              <div className="preview-container">
+                <InvoicePreview
+                  invoice={invoice}
+                />
+              </div>
+
+            </div>
+
+          </aside>
+
+        </div>
+      ) : (
+
+        /* VIEW MODE */
+        <div className="view-layout">
+
+          <div className="view-summary">
+
+            <section className="summary-card">
+
+              <div className="summary-icon">
+                {isHousekeeping
+                  ? 'HK'
+                  : 'CT'}
+              </div>
+
+              <div>
+
+                <span>
+                  {isHousekeeping
+                    ? 'HOUSEKEEPING'
+                    : 'CATERING'}
+                </span>
+
+                <h2>
+                  {form.invoiceNo || 'Invoice'}
+                </h2>
+
+                <p>
+                  Invoice Date:{' '}
+                  {formatDate(
+                    form.invoiceDate
+                  )}
+                </p>
+
+              </div>
+
+            </section>
+
+            <section className="summary-card">
+
+              <div className="summary-details">
+
+                <div>
+                  <span>Buyer</span>
+                  <strong>
+                    {form.billToName ||
+                      '-'}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Subtotal</span>
+                  <strong>
+                    {formatMoney(
+                      invoice.subtotal
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Grand Total</span>
+                  <strong className="total-highlight">
+                    {formatMoney(
+                      invoice.grandTotal
+                    )}
+                  </strong>
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+          <section className="full-preview-card">
+
+            <div className="preview-heading">
+
+              <div>
+                <span>
+                  DOCUMENT PREVIEW
+                </span>
+
+                <h2>
+                  Final Invoice
+                </h2>
+              </div>
+
+              <div className="preview-actions">
+
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={() =>
+                    window.print()
+                  }
+                >
+                  Print
+                </button>
+
+              </div>
+
+            </div>
+
+            <div className="preview-container large-preview">
+              <InvoicePreview
+                invoice={invoice}
+              />
+            </div>
+
+          </section>
+
+        </div>
+      )}
+
+      {/* Company details are intentionally not editable */}
+      <div className="company-locked-note no-print">
+        <div className="lock-icon">🔒</div>
+
+        <div>
+          <strong>
+            GNK company information is locked
+          </strong>
+
+          <p>
+            Company address, GSTIN, contact number,
+            bank details and declaration are controlled
+            by the application and are not editable from
+            the invoice screen.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
