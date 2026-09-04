@@ -74,7 +74,6 @@ function map(r: any) {
     billToGstin: r.bill_to_gstin,
     billToState: r.bill_to_state,
     billDescription: r.bill_description,
-
     lineItems: r.line_items,
 
     cgstRate:
