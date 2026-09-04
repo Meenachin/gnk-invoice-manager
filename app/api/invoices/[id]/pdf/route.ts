@@ -1,4 +1,98 @@
-import {NextResponse} from 'next/server'; import {db} from '@/lib/db'; import {buildInvoicePdf} from '@/lib/pdf';
-export const runtime='nodejs';
-export async function GET(_:Request,{params}:{params:{id:string}}){try{const sql=db();const rows=await sql`SELECT * FROM invoices WHERE id=${params.id} LIMIT 1`;if(!rows[0])return NextResponse.json({error:'Invoice not found'},{status:404});const r=rows[0];const inv=map(r);const pdf=await buildInvoicePdf(inv);return new NextResponse(pdf as unknown as BodyInit, {status:200,headers:{'Content-Type':'application/pdf','Content-Disposition':`inline; filename="${safe(r.invoice_no)}.pdf"`}})}catch(e:any){return NextResponse.json({error:e.message},{status:500})}}
-function safe(s:string){return s.replace(/[^a-z0-9-_]/gi,'_')}; function map(r:any){return {id:r.id,invoiceType:r.invoice_type,invoiceNo:r.invoice_no,invoiceDate:String(r.invoice_date).slice(0,10),periodFrom:r.period_from?String(r.period_from).slice(0,10):null,periodTo:r.period_to?String(r.period_to).slice(0,10):null,workDescription:r.work_description,billToName:r.bill_to_name,billToAddress:r.bill_to_address,billToGstin:r.bill_to_gstin,billToState:r.bill_to_state,billDescription:r.bill_description,lineItems:r.line_items,taxCgst:Number(r.tax_cgst),taxSgst:Number(r.tax_sgst),cgstRate:r.invoice_type==='catering'?2.5:9,sgstRate:r.invoice_type==='catering'?2.5:9,subtotal:Number(r.subtotal),grandTotal:Number(r.grand_total)}}
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { buildInvoicePdf } from '@/lib/pdf';
+
+export const runtime = 'nodejs';
+
+export async function GET(
+  _: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const sql = db();
+
+    const rows = await sql`
+      SELECT *
+      FROM invoices
+      WHERE id = ${params.id}
+      LIMIT 1
+    `;
+
+    if (!rows[0]) {
+      return NextResponse.json(
+        { error: 'Invoice not found' },
+        { status: 404 }
+      );
+    }
+
+    const r = rows[0];
+    const inv = map(r);
+
+    const pdf = await buildInvoicePdf(inv);
+
+    return new NextResponse(
+      pdf as unknown as BodyInit,
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `inline; filename="${safe(
+            r.invoice_no
+          )}.pdf"`,
+        },
+      }
+    );
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e.message },
+      { status: 500 }
+    );
+  }
+}
+
+function safe(s: string) {
+  return s.replace(/[^a-z0-9-_]/gi, '_');
+}
+
+function map(r: any) {
+  return {
+    id: r.id,
+    invoiceType: r.invoice_type,
+    invoiceNo: r.invoice_no,
+    invoiceDate: String(r.invoice_date).slice(0, 10),
+
+    periodFrom: r.period_from
+      ? String(r.period_from).slice(0, 10)
+      : null,
+
+    periodTo: r.period_to
+      ? String(r.period_to).slice(0, 10)
+      : null,
+
+    workDescription: r.work_description,
+
+    billToName: r.bill_to_name,
+    billToAddress: r.bill_to_address,
+    billToGstin: r.bill_to_gstin,
+    billToState: r.bill_to_state,
+    billDescription: r.bill_description,
+
+    lineItems: r.line_items,
+
+    cgstRate:
+      r.invoice_type === 'catering'
+        ? 2.5
+        : 9,
+
+    sgstRate:
+      r.invoice_type === 'catering'
+        ? 2.5
+        : 9,
+
+    taxCgst: Number(r.tax_cgst),
+    taxSgst: Number(r.tax_sgst),
+
+    subtotal: Number(r.subtotal),
+    grandTotal: Number(r.grand_total),
+  };
+}
