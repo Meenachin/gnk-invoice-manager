@@ -1,3 +1,6 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = { reactStrictMode: true };
+const nextConfig = {
+  serverExternalPackages: ['pdfkit'],
+};
+
 export default nextConfig;
