@@ -1475,53 +1475,7 @@ a {
    PRINT
 ========================= */
 
-@media print {
-  body {
-    background: white;
-  }
 
-  .topbar,
-  .no-print,
-  .invoice-page-header,
-  .alert,
-  .company-locked-note,
-  .preview-heading,
-  .save-bar {
-    display: none !important;
-  }
-
-  .invoice-page {
-    padding: 0;
-
-    max-width: none;
-  }
-
-  .view-layout,
-  .full-preview-card,
-  .preview-container {
-    display: block;
-
-    border: 0;
-
-    padding: 0;
-
-    margin: 0;
-
-    background: white;
-
-    box-shadow: none;
-  }
-
-  .paper {
-    box-shadow: none;
-
-    margin: 0 auto;
-  }
-
-  .paper.hk {
-    padding: 20px 30px;
-  }
-}
 /* =========================================================
    GNK INVOICE MANAGER
    FULL WIDTH CLEAN INVOICE FORM
