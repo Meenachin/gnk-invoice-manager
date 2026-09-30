@@ -2659,3 +2659,92 @@ a {
   }
 
 }
+/* =========================================================
+   PRINT - PRINT ONLY THE ACTUAL INVOICE
+   ========================================================= */
+
+@media print {
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* HIDE ALL APPLICATION UI */
+  .topbar,
+  .invoice-page-header,
+  .view-summary,
+  .company-locked-note,
+  .preview-heading,
+  .header-actions,
+  .header-left,
+  .back-link,
+  .status-badge,
+  .alert,
+  .preview-actions {
+    display: none !important;
+  }
+
+  /* REMOVE OUTER PAGE SPACING */
+  .invoice-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .view-layout {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .full-preview-card {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  .preview-container,
+  .large-preview {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  /* THE ACTUAL INVOICE */
+  .paper {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  /* DO NOT PRINT THE APP FOOTER / OTHER ELEMENTS */
+  .no-print {
+    display: none !important;
+  }
+}
