@@ -30,16 +30,17 @@ export async function GET(
 
     const pdf = await buildInvoicePdf(inv);
 
-    return new NextResponse(pdf as unknown as BodyInit,{
-        status: 200,
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `inline; filename="${safe(
-            r.invoice_no
-          )}.pdf"`,
-        },
-      }
-    );
+    return new NextResponse(new Uint8Array(pdf), {
+  status: 200,
+  headers: {
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename="${safe(
+      r.invoice_no
+    )}.pdf"`,
+    'Content-Length': String(pdf.length),
+    'Cache-Control': 'no-store',
+  },
+});
   } catch (e: any) {
     return NextResponse.json(
       { error: e.message },
