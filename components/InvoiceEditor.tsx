@@ -620,35 +620,8 @@ export default function InvoiceEditor({
             </button>
           )}
 
-          {id && (
-            <>
-              <a
-                className="btn secondary"
-                href={`/api/invoices/${id}/pdf`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                PDF
-              </a>
-
-              <a
-                className="btn secondary"
-                href={`/api/invoices/${id}/docx`}
-              >
-                DOCX
-              </a>
-
-              <button
-                type="button"
-                className="btn secondary"
-                onClick={() =>
-                  window.print()
-                }
-              >
-                Print
-              </button>
-            </>
-          )}
+         
+             
 
         </div>
 
