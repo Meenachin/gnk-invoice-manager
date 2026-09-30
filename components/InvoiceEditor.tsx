@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
-import InvoicePreview from './InvoicePreview';
+
 import { Invoice, InvoiceInput, LineItem } from '@/lib/types';
 import { calculateTotals } from '@/lib/invoice';
 
@@ -1135,37 +1135,7 @@ export default function InvoiceEditor({
           </div>
 
           {/* LIVE PREVIEW */}
-          <aside className="preview-column">
-
-            <div className="preview-sticky">
-
-              <div className="preview-heading">
-
-                <div>
-                  <span>
-                    LIVE PREVIEW
-                  </span>
-
-                  <h2>
-                    Final Invoice
-                  </h2>
-                </div>
-
-                <span className="preview-dot">
-                  Live
-                </span>
-
-              </div>
-
-              <div className="preview-container">
-                <InvoicePreview
-                  invoice={invoice}
-                />
-              </div>
-
-            </div>
-
-          </aside>
+         
 
         </div>
       ) : (
