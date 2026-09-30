@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
-
+import InvoicePreview from './InvoicePreview';
 import { Invoice, InvoiceInput, LineItem } from '@/lib/types';
 import { calculateTotals } from '@/lib/invoice';
 
@@ -12,22 +12,27 @@ type Props = {
   type?: 'catering' | 'housekeeping';
 };
 
-const companyDefaults = {
-  phone: '9701055662',
-  gstin: '36BMTPG2251D1Z6',
-  hkCode: '00440318',
-};
-
 function createBlankInvoice(
   type: 'catering' | 'housekeeping'
 ): InvoiceInput {
   return {
     invoiceType: type,
-    invoiceNo: '',
-    invoiceDate: new Date().toISOString().slice(0, 10),
 
-    periodFrom: type === 'housekeeping' ? '' : null,
-    periodTo: type === 'housekeeping' ? '' : null,
+    invoiceNo: '',
+
+    invoiceDate: new Date()
+      .toISOString()
+      .slice(0, 10),
+
+    periodFrom:
+      type === 'housekeeping'
+        ? ''
+        : null,
+
+    periodTo:
+      type === 'housekeeping'
+        ? ''
+        : null,
 
     workDescription:
       type === 'housekeeping'
@@ -35,8 +40,11 @@ function createBlankInvoice(
         : '',
 
     billToName: '',
+
     billToAddress: '',
+
     billToGstin: '',
+
     billToState: 'Telangana, Code : 36',
 
     billDescription: '',
@@ -47,16 +55,28 @@ function createBlankInvoice(
         quantity: 1,
         rate: 0,
         per: 'Quantity',
-        hsnSac: type === 'housekeeping' ? '998533' : '',
+        hsnSac:
+          type === 'housekeeping'
+            ? '998533'
+            : '',
       },
     ],
 
-    cgstRate: type === 'catering' ? 2.5 : 9,
-    sgstRate: type === 'catering' ? 2.5 : 9,
+    cgstRate:
+      type === 'catering'
+        ? 2.5
+        : 9,
+
+    sgstRate:
+      type === 'catering'
+        ? 2.5
+        : 9,
   };
 }
 
-function calculateInvoice(input: InvoiceInput): Invoice {
+function calculateInvoice(
+  input: InvoiceInput
+): Invoice {
   const totals = calculateTotals(
     input.lineItems,
     input.cgstRate,
@@ -71,18 +91,25 @@ function calculateInvoice(input: InvoiceInput): Invoice {
 }
 
 function formatMoney(value: number) {
-  return `₹ ${Number(value || 0).toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  return `₹ ${Number(value || 0).toLocaleString(
+    'en-IN',
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  )}`;
 }
 
 function formatDate(value?: string | null) {
   if (!value) return '-';
 
-  const parts = String(value).slice(0, 10).split('-');
+  const parts = String(value)
+    .slice(0, 10)
+    .split('-');
 
-  if (parts.length !== 3) return value;
+  if (parts.length !== 3) {
+    return value;
+  }
 
   return `${parts[2]}-${parts[1]}-${parts[0]}`;
 }
@@ -91,22 +118,34 @@ export default function InvoiceEditor({
   id,
   type = 'catering',
 }: Props) {
-  const [form, setForm] = useState<InvoiceInput>(
-    createBlankInvoice(type)
-  );
+  const [form, setForm] =
+    useState<InvoiceInput>(
+      createBlankInvoice(type)
+    );
 
-  const [loading, setLoading] = useState(Boolean(id));
-  const [editing, setEditing] = useState(!id);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] =
+    useState(Boolean(id));
 
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [editing, setEditing] =
+    useState(!id);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState('');
+
+  const [error, setError] =
+    useState('');
 
   const invoice = useMemo(
     () => calculateInvoice(form),
     [form]
   );
 
+  /*
+   * LOAD EXISTING INVOICE
+   */
   useEffect(() => {
     if (!id) return;
 
@@ -124,16 +163,20 @@ export default function InvoiceEditor({
           }
         );
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
         if (!response.ok) {
           throw new Error(
-            data?.error || 'Unable to load invoice'
+            data?.error ||
+              'Unable to load invoice'
           );
         }
 
         if (!data.invoice) {
-          throw new Error('Invoice not found');
+          throw new Error(
+            'Invoice not found'
+          );
         }
 
         const item = data.invoice;
@@ -141,25 +184,35 @@ export default function InvoiceEditor({
         if (cancelled) return;
 
         const invoiceType =
-          item.invoice_type === 'housekeeping'
+          item.invoice_type ===
+          'housekeeping'
             ? 'housekeeping'
             : 'catering';
 
         setForm({
           invoiceType,
-          invoiceNo: item.invoice_no || '',
-          invoiceDate: String(item.invoice_date || '').slice(
-            0,
-            10
-          ),
 
-          periodFrom: item.period_from
-            ? String(item.period_from).slice(0, 10)
-            : null,
+          invoiceNo:
+            item.invoice_no || '',
 
-          periodTo: item.period_to
-            ? String(item.period_to).slice(0, 10)
-            : null,
+          invoiceDate:
+            String(
+              item.invoice_date || ''
+            ).slice(0, 10),
+
+          periodFrom:
+            item.period_from
+              ? String(
+                  item.period_from
+                ).slice(0, 10)
+              : null,
+
+          periodTo:
+            item.period_to
+              ? String(
+                  item.period_to
+                ).slice(0, 10)
+              : null,
 
           workDescription:
             item.work_description || '',
@@ -174,35 +227,58 @@ export default function InvoiceEditor({
             item.bill_to_gstin || '',
 
           billToState:
-            item.bill_to_state || '',
+            item.bill_to_state ||
+            'Telangana, Code : 36',
 
           billDescription:
             item.bill_description || '',
 
-          lineItems: Array.isArray(item.line_items)
-            ? item.line_items.map((line: any) => ({
-                description: line.description || '',
-                quantity: Number(line.quantity || 0),
-                rate: Number(line.rate || 0),
-                per: line.per || '',
-                hsnSac: line.hsnSac || '',
-              }))
-            : [],
+          lineItems:
+            Array.isArray(
+              item.line_items
+            )
+              ? item.line_items.map(
+                  (line: any) => ({
+                    description:
+                      line.description ||
+                      '',
+
+                    quantity:
+                      Number(
+                        line.quantity || 0
+                      ),
+
+                    rate:
+                      Number(
+                        line.rate || 0
+                      ),
+
+                    per:
+                      line.per || '',
+
+                    hsnSac:
+                      line.hsnSac || '',
+                  })
+                )
+              : [],
 
           cgstRate:
-            invoiceType === 'catering'
+            invoiceType ===
+            'catering'
               ? 2.5
               : 9,
 
           sgstRate:
-            invoiceType === 'catering'
+            invoiceType ===
+            'catering'
               ? 2.5
               : 9,
         });
       } catch (err: any) {
         if (!cancelled) {
           setError(
-            err?.message || 'Unable to load invoice'
+            err?.message ||
+              'Unable to load invoice'
           );
         }
       } finally {
@@ -219,7 +295,12 @@ export default function InvoiceEditor({
     };
   }, [id]);
 
-  function updateField<K extends keyof InvoiceInput>(
+  /*
+   * UPDATE FIELD
+   */
+  function updateField<
+    K extends keyof InvoiceInput
+  >(
     key: K,
     value: InvoiceInput[K]
   ) {
@@ -232,6 +313,9 @@ export default function InvoiceEditor({
     setError('');
   }
 
+  /*
+   * UPDATE LINE ITEM
+   */
   function updateLine(
     index: number,
     key: keyof LineItem,
@@ -240,37 +324,44 @@ export default function InvoiceEditor({
     setForm((current) => ({
       ...current,
 
-      lineItems: current.lineItems.map(
-        (item, itemIndex) => {
-          if (itemIndex !== index) {
-            return item;
-          }
+      lineItems:
+        current.lineItems.map(
+          (item, itemIndex) => {
+            if (
+              itemIndex !== index
+            ) {
+              return item;
+            }
 
-          if (
-            key === 'quantity' ||
-            key === 'rate'
-          ) {
+            if (
+              key === 'quantity' ||
+              key === 'rate'
+            ) {
+              return {
+                ...item,
+
+                [key]:
+                  value === ''
+                    ? 0
+                    : Number(value),
+              };
+            }
+
             return {
               ...item,
-              [key]:
-                value === ''
-                  ? 0
-                  : Number(value),
+              [key]: value,
             };
           }
-
-          return {
-            ...item,
-            [key]: value,
-          };
-        }
-      ),
+        ),
     }));
 
     setMessage('');
     setError('');
   }
 
+  /*
+   * ADD ITEM
+   */
   function addLine() {
     setForm((current) => ({
       ...current,
@@ -283,8 +374,10 @@ export default function InvoiceEditor({
           quantity: 1,
           rate: 0,
           per: 'Quantity',
+
           hsnSac:
-            current.invoiceType === 'housekeeping'
+            current.invoiceType ===
+            'housekeeping'
               ? '998533'
               : '',
         },
@@ -292,21 +385,30 @@ export default function InvoiceEditor({
     }));
   }
 
+  /*
+   * REMOVE ITEM
+   */
   function removeLine(index: number) {
-    if (form.lineItems.length === 1) {
+    if (
+      form.lineItems.length === 1
+    ) {
       return;
     }
 
     setForm((current) => ({
       ...current,
 
-      lineItems: current.lineItems.filter(
-        (_, itemIndex) =>
-          itemIndex !== index
-      ),
+      lineItems:
+        current.lineItems.filter(
+          (_, itemIndex) =>
+            itemIndex !== index
+        ),
     }));
   }
 
+  /*
+   * SAVE / UPDATE
+   */
   async function saveInvoice() {
     setSaving(true);
     setMessage('');
@@ -331,7 +433,9 @@ export default function InvoiceEditor({
         );
       }
 
-      if (form.lineItems.length === 0) {
+      if (
+        form.lineItems.length === 0
+      ) {
         throw new Error(
           'Add at least one line item.'
         );
@@ -342,21 +446,26 @@ export default function InvoiceEditor({
           ? `/api/invoices/${id}`
           : '/api/invoices',
         {
-          method: id ? 'PUT' : 'POST',
+          method: id
+            ? 'PUT'
+            : 'POST',
 
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type':
+              'application/json',
           },
 
           body: JSON.stringify(form),
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          typeof data?.error === 'string'
+          typeof data?.error ===
+            'string'
             ? data.error
             : 'Unable to save invoice.'
         );
@@ -370,7 +479,10 @@ export default function InvoiceEditor({
 
       setEditing(false);
 
-      if (!id && data?.invoice?.id) {
+      if (
+        !id &&
+        data?.invoice?.id
+      ) {
         window.location.href =
           `/invoices/${data.invoice.id}`;
       }
@@ -384,25 +496,44 @@ export default function InvoiceEditor({
     }
   }
 
+  /*
+   * LOADING
+   */
   if (loading) {
     return (
       <div className="invoice-loading">
         <div className="loading-spinner" />
-        <h3>Loading invoice...</h3>
-        <p>Please wait while we load the saved invoice.</p>
+
+        <h3>
+          Loading invoice...
+        </h3>
+
+        <p>
+          Please wait while we load
+          the saved invoice.
+        </p>
       </div>
     );
   }
 
-  if (error && !form.invoiceNo) {
+  /*
+   * ERROR
+   */
+  if (
+    error &&
+    !form.invoiceNo
+  ) {
     return (
       <div className="invoice-error-page">
-        <h2>Unable to load invoice</h2>
+        <h2>
+          Unable to load invoice
+        </h2>
+
         <p>{error}</p>
 
         <Link
           href="/invoices"
-          className="btn"
+          className="btn primary"
         >
           Back to Invoices
         </Link>
@@ -411,12 +542,16 @@ export default function InvoiceEditor({
   }
 
   const isHousekeeping =
-    form.invoiceType === 'housekeeping';
+    form.invoiceType ===
+    'housekeeping';
 
   return (
     <div className="invoice-page">
 
-      {/* HEADER */}
+      {/* =====================================================
+          PAGE HEADER
+      ====================================================== */}
+
       <div className="invoice-page-header">
 
         <div className="header-left">
@@ -431,6 +566,7 @@ export default function InvoiceEditor({
           <div className="title-row">
 
             <div>
+
               <div className="eyebrow">
                 GNK INVOICE MANAGER
               </div>
@@ -443,9 +579,13 @@ export default function InvoiceEditor({
 
               <p>
                 {id
-                  ? `Invoice ${form.invoiceNo || '—'}`
+                  ? `Invoice ${
+                      form.invoiceNo ||
+                      '—'
+                    }`
                   : 'Create a new invoice'}
               </p>
+
             </div>
 
             <span
@@ -501,7 +641,9 @@ export default function InvoiceEditor({
               <button
                 type="button"
                 className="btn secondary"
-                onClick={() => window.print()}
+                onClick={() =>
+                  window.print()
+                }
               >
                 Print
               </button>
@@ -512,7 +654,11 @@ export default function InvoiceEditor({
 
       </div>
 
-      {/* MESSAGE */}
+
+      {/* =====================================================
+          ALERTS
+      ====================================================== */}
+
       {message && (
         <div className="alert success-alert">
           <span>✓</span>
@@ -527,40 +673,61 @@ export default function InvoiceEditor({
         </div>
       )}
 
-      {/* EDIT MODE */}
+
+      {/* =====================================================
+          EDIT MODE
+      ====================================================== */}
+
       {editing ? (
+
         <div className="editor-layout">
 
           <div className="editor-column">
 
-            {/* INVOICE DETAILS */}
+
+            {/* =================================================
+                01 INVOICE DETAILS
+            ================================================= */}
+
             <section className="editor-card">
 
               <div className="card-heading">
-                <div>
+
+                <div className="heading-content">
+
                   <span className="section-number">
                     01
                   </span>
 
                   <div>
-                    <h2>Invoice Details</h2>
+                    <h2>
+                      Invoice Details
+                    </h2>
+
                     <p>
-                      Basic information for this invoice
+                      Basic information for
+                      this invoice
                     </p>
                   </div>
+
                 </div>
+
               </div>
+
 
               <div className="field-grid">
 
                 <div className="field">
+
                   <label>
                     Invoice Number
                     <span>*</span>
                   </label>
 
                   <input
-                    value={form.invoiceNo}
+                    value={
+                      form.invoiceNo
+                    }
                     onChange={(e) =>
                       updateField(
                         'invoiceNo',
@@ -573,9 +740,12 @@ export default function InvoiceEditor({
                         : 'SBI/AUG26/A1'
                     }
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     Invoice Date
                     <span>*</span>
@@ -583,7 +753,9 @@ export default function InvoiceEditor({
 
                   <input
                     type="date"
-                    value={form.invoiceDate}
+                    value={
+                      form.invoiceDate
+                    }
                     onChange={(e) =>
                       updateField(
                         'invoiceDate',
@@ -591,20 +763,25 @@ export default function InvoiceEditor({
                       )
                     }
                   />
+
                 </div>
 
               </div>
 
+
               {isHousekeeping && (
-                <>
+                <div className="housekeeping-fields">
+
                   <div className="field">
+
                     <label>
                       Description of Work
                     </label>
 
                     <input
                       value={
-                        form.workDescription || ''
+                        form.workDescription ||
+                        ''
                       }
                       onChange={(e) =>
                         updateField(
@@ -612,12 +789,16 @@ export default function InvoiceEditor({
                           e.target.value
                         )
                       }
+                      placeholder="Housekeeping and maintenance works"
                     />
+
                   </div>
+
 
                   <div className="field-grid">
 
                     <div className="field">
+
                       <label>
                         Period From
                       </label>
@@ -625,7 +806,8 @@ export default function InvoiceEditor({
                       <input
                         type="date"
                         value={
-                          form.periodFrom || ''
+                          form.periodFrom ||
+                          ''
                         }
                         onChange={(e) =>
                           updateField(
@@ -634,9 +816,12 @@ export default function InvoiceEditor({
                           )
                         }
                       />
+
                     </div>
 
+
                     <div className="field">
+
                       <label>
                         Period To
                       </label>
@@ -644,7 +829,8 @@ export default function InvoiceEditor({
                       <input
                         type="date"
                         value={
-                          form.periodTo || ''
+                          form.periodTo ||
+                          ''
                         }
                         onChange={(e) =>
                           updateField(
@@ -653,31 +839,46 @@ export default function InvoiceEditor({
                           )
                         }
                       />
+
                     </div>
 
                   </div>
-                </>
+
+                </div>
               )}
 
             </section>
 
-            {/* BUYER */}
+
+            {/* =================================================
+                02 BUYER INFORMATION
+            ================================================= */}
+
             <section className="editor-card">
 
               <div className="card-heading">
-                <div>
+
+                <div className="heading-content">
+
                   <span className="section-number">
                     02
                   </span>
 
                   <div>
-                    <h2>Buyer Information</h2>
+                    <h2>
+                      Buyer Information
+                    </h2>
+
                     <p>
-                      Customer information printed on the invoice
+                      Customer information
+                      printed on the invoice
                     </p>
                   </div>
+
                 </div>
+
               </div>
+
 
               <div className="field">
 
@@ -687,17 +888,21 @@ export default function InvoiceEditor({
                 </label>
 
                 <textarea
-                  rows={3}
-                  value={form.billToName}
+                  rows={2}
+                  value={
+                    form.billToName
+                  }
                   onChange={(e) =>
                     updateField(
                       'billToName',
                       e.target.value
                     )
                   }
+                  placeholder="Enter buyer / company name"
                 />
 
               </div>
+
 
               <div className="field">
 
@@ -706,9 +911,10 @@ export default function InvoiceEditor({
                 </label>
 
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={
-                    form.billToAddress || ''
+                    form.billToAddress ||
+                    ''
                   }
                   onChange={(e) =>
                     updateField(
@@ -716,9 +922,11 @@ export default function InvoiceEditor({
                       e.target.value
                     )
                   }
+                  placeholder="Enter complete billing address"
                 />
 
               </div>
+
 
               <div className="field-grid">
 
@@ -730,7 +938,8 @@ export default function InvoiceEditor({
 
                   <input
                     value={
-                      form.billToGstin || ''
+                      form.billToGstin ||
+                      ''
                     }
                     onChange={(e) =>
                       updateField(
@@ -738,9 +947,11 @@ export default function InvoiceEditor({
                         e.target.value
                       )
                     }
+                    placeholder="GSTIN / UIN"
                   />
 
                 </div>
+
 
                 <div className="field">
 
@@ -750,7 +961,8 @@ export default function InvoiceEditor({
 
                   <input
                     value={
-                      form.billToState || ''
+                      form.billToState ||
+                      ''
                     }
                     onChange={(e) =>
                       updateField(
@@ -758,6 +970,7 @@ export default function InvoiceEditor({
                         e.target.value
                       )
                     }
+                    placeholder="Telangana, Code : 36"
                   />
 
                 </div>
@@ -766,30 +979,48 @@ export default function InvoiceEditor({
 
             </section>
 
-            {/* BILL DESCRIPTION */}
+
+            {/* =================================================
+                03 BILL DESCRIPTION
+            ================================================= */}
+
             <section className="editor-card">
 
               <div className="card-heading">
-                <div>
+
+                <div className="heading-content">
+
                   <span className="section-number">
                     03
                   </span>
 
                   <div>
-                    <h2>Bill Description</h2>
+                    <h2>
+                      Bill Description
+                    </h2>
+
                     <p>
-                      Description shown in the invoice
+                      Description shown in
+                      the final invoice
                     </p>
                   </div>
+
                 </div>
+
               </div>
 
+
               <div className="field">
+
+                <label>
+                  Description
+                </label>
 
                 <textarea
                   rows={5}
                   value={
-                    form.billDescription || ''
+                    form.billDescription ||
+                    ''
                   }
                   onChange={(e) =>
                     updateField(
@@ -797,30 +1028,41 @@ export default function InvoiceEditor({
                       e.target.value
                     )
                   }
-                  placeholder="Enter bill description..."
+                  placeholder="Enter the bill description..."
                 />
 
               </div>
 
             </section>
 
-            {/* ITEMS */}
+
+            {/* =================================================
+                04 LINE ITEMS
+            ================================================= */}
+
             <section className="editor-card">
 
               <div className="card-heading items-heading">
 
-                <div>
+                <div className="heading-content">
+
                   <span className="section-number">
                     04
                   </span>
 
                   <div>
-                    <h2>Line Items</h2>
+                    <h2>
+                      Line Items
+                    </h2>
+
                     <p>
-                      Add services or products included in this invoice
+                      Add services or products
+                      included in this invoice
                     </p>
                   </div>
+
                 </div>
+
 
                 <button
                   type="button"
@@ -832,9 +1074,11 @@ export default function InvoiceEditor({
 
               </div>
 
+
               <div className="items-editor">
 
                 <div className="items-header">
+
                   <span>#</span>
                   <span>Description</span>
                   <span>HSN/SAC</span>
@@ -843,14 +1087,20 @@ export default function InvoiceEditor({
                   <span>Per</span>
                   <span>Amount</span>
                   <span />
+
                 </div>
+
 
                 {form.lineItems.map(
                   (item, index) => {
 
                     const amount =
-                      Number(item.quantity || 0) *
-                      Number(item.rate || 0);
+                      Number(
+                        item.quantity || 0
+                      ) *
+                      Number(
+                        item.rate || 0
+                      );
 
                     return (
                       <div
@@ -861,6 +1111,7 @@ export default function InvoiceEditor({
                         <div className="item-number">
                           {index + 1}
                         </div>
+
 
                         <input
                           value={
@@ -876,6 +1127,7 @@ export default function InvoiceEditor({
                           placeholder="Description"
                         />
 
+
                         <input
                           value={
                             item.hsnSac || ''
@@ -889,6 +1141,7 @@ export default function InvoiceEditor({
                           }
                           placeholder="HSN/SAC"
                         />
+
 
                         <input
                           type="number"
@@ -906,6 +1159,7 @@ export default function InvoiceEditor({
                           }
                         />
 
+
                         <input
                           type="number"
                           min="0"
@@ -922,6 +1176,7 @@ export default function InvoiceEditor({
                           }
                         />
 
+
                         <input
                           value={
                             item.per || ''
@@ -936,20 +1191,27 @@ export default function InvoiceEditor({
                           placeholder="Per"
                         />
 
+
                         <div className="item-amount">
-                          {formatMoney(amount)}
+                          {formatMoney(
+                            amount
+                          )}
                         </div>
+
 
                         <button
                           type="button"
                           className="remove-item"
                           onClick={() =>
-                            removeLine(index)
+                            removeLine(
+                              index
+                            )
                           }
                           title="Remove item"
                           disabled={
-                            form.lineItems.length ===
-                            1
+                            form
+                              .lineItems
+                              .length === 1
                           }
                         >
                           ×
@@ -964,82 +1226,114 @@ export default function InvoiceEditor({
 
             </section>
 
-            {/* TAX */}
+
+            {/* =================================================
+                05 TAX & TOTALS
+            ================================================= */}
+
             <section className="editor-card">
 
               <div className="card-heading">
-                <div>
+
+                <div className="heading-content">
+
                   <span className="section-number">
                     05
                   </span>
 
                   <div>
-                    <h2>Tax & Totals</h2>
+                    <h2>
+                      Tax & Totals
+                    </h2>
+
                     <p>
-                      Tax rates and automatically calculated totals
+                      Tax rates and automatically
+                      calculated totals
                     </p>
                   </div>
+
                 </div>
+
               </div>
 
-              <div className="tax-grid">
 
-                <div className="tax-field">
+              <div className="tax-layout">
 
-                  <label>CGST</label>
+                <div className="tax-rates">
 
-                  <div className="tax-input">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={
-                        form.cgstRate
-                      }
-                      onChange={(e) =>
-                        updateField(
-                          'cgstRate',
-                          Number(
-                            e.target.value
+                  <div className="tax-field">
+
+                    <label>
+                      CGST
+                    </label>
+
+                    <div className="tax-input">
+
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          form.cgstRate
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            'cgstRate',
+                            Number(
+                              e.target.value
+                            )
                           )
-                        )
-                      }
-                    />
-                    <span>%</span>
+                        }
+                      />
+
+                      <span>%</span>
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="tax-field">
+
+                    <label>
+                      SGST
+                    </label>
+
+                    <div className="tax-input">
+
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          form.sgstRate
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            'sgstRate',
+                            Number(
+                              e.target.value
+                            )
+                          )
+                        }
+                      />
+
+                      <span>%</span>
+
+                    </div>
+
                   </div>
 
                 </div>
 
-                <div className="tax-field">
-
-                  <label>SGST</label>
-
-                  <div className="tax-input">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={
-                        form.sgstRate
-                      }
-                      onChange={(e) =>
-                        updateField(
-                          'sgstRate',
-                          Number(
-                            e.target.value
-                          )
-                        )
-                      }
-                    />
-                    <span>%</span>
-                  </div>
-
-                </div>
 
                 <div className="totals-box">
 
                   <div>
-                    <span>Subtotal</span>
+                    <span>
+                      Subtotal
+                    </span>
+
                     <strong>
                       {formatMoney(
                         invoice.subtotal
@@ -1047,10 +1341,12 @@ export default function InvoiceEditor({
                     </strong>
                   </div>
 
+
                   <div>
                     <span>
                       CGST {form.cgstRate}%
                     </span>
+
                     <strong>
                       {formatMoney(
                         invoice.taxCgst
@@ -1058,10 +1354,12 @@ export default function InvoiceEditor({
                     </strong>
                   </div>
 
+
                   <div>
                     <span>
                       SGST {form.sgstRate}%
                     </span>
+
                     <strong>
                       {formatMoney(
                         invoice.taxSgst
@@ -1069,13 +1367,19 @@ export default function InvoiceEditor({
                     </strong>
                   </div>
 
+
                   <div className="grand-total">
-                    <span>Grand Total</span>
+
+                    <span>
+                      Grand Total
+                    </span>
+
                     <strong>
                       {formatMoney(
                         invoice.grandTotal
                       )}
                     </strong>
+
                   </div>
 
                 </div>
@@ -1084,10 +1388,15 @@ export default function InvoiceEditor({
 
             </section>
 
-            {/* SAVE BAR */}
+
+            {/* =================================================
+                SAVE BAR
+            ================================================= */}
+
             <div className="save-bar">
 
               <div>
+
                 <strong>
                   {id
                     ? 'Update this invoice'
@@ -1095,9 +1404,12 @@ export default function InvoiceEditor({
                 </strong>
 
                 <span>
-                  All calculated amounts will be saved automatically.
+                  All calculated amounts will
+                  be saved automatically.
                 </span>
+
               </div>
+
 
               <div className="save-actions">
 
@@ -1114,6 +1426,7 @@ export default function InvoiceEditor({
                     Cancel
                   </button>
                 )}
+
 
                 <button
                   type="button"
@@ -1134,13 +1447,14 @@ export default function InvoiceEditor({
 
           </div>
 
-          {/* LIVE PREVIEW */}
-         
-
         </div>
+
       ) : (
 
-        /* VIEW MODE */
+        /* =====================================================
+           SAVED / VIEW MODE
+        ====================================================== */
+
         <div className="view-layout">
 
           <div className="view-summary">
@@ -1162,7 +1476,8 @@ export default function InvoiceEditor({
                 </span>
 
                 <h2>
-                  {form.invoiceNo || 'Invoice'}
+                  {form.invoiceNo ||
+                    'Invoice'}
                 </h2>
 
                 <p>
@@ -1176,20 +1491,28 @@ export default function InvoiceEditor({
 
             </section>
 
+
             <section className="summary-card">
 
               <div className="summary-details">
 
                 <div>
-                  <span>Buyer</span>
+                  <span>
+                    Buyer
+                  </span>
+
                   <strong>
                     {form.billToName ||
                       '-'}
                   </strong>
                 </div>
 
+
                 <div>
-                  <span>Subtotal</span>
+                  <span>
+                    Subtotal
+                  </span>
+
                   <strong>
                     {formatMoney(
                       invoice.subtotal
@@ -1197,8 +1520,12 @@ export default function InvoiceEditor({
                   </strong>
                 </div>
 
+
                 <div>
-                  <span>Grand Total</span>
+                  <span>
+                    Grand Total
+                  </span>
+
                   <strong className="total-highlight">
                     {formatMoney(
                       invoice.grandTotal
@@ -1212,11 +1539,13 @@ export default function InvoiceEditor({
 
           </div>
 
+
           <section className="full-preview-card">
 
             <div className="preview-heading">
 
               <div>
+
                 <span>
                   DOCUMENT PREVIEW
                 </span>
@@ -1224,7 +1553,9 @@ export default function InvoiceEditor({
                 <h2>
                   Final Invoice
                 </h2>
+
               </div>
+
 
               <div className="preview-actions">
 
@@ -1242,32 +1573,46 @@ export default function InvoiceEditor({
 
             </div>
 
+
             <div className="preview-container large-preview">
+
               <InvoicePreview
                 invoice={invoice}
               />
+
             </div>
 
           </section>
 
         </div>
+
       )}
 
-      {/* Company details are intentionally not editable */}
+
+      {/* =====================================================
+          LOCKED COMPANY INFORMATION
+      ====================================================== */}
+
       <div className="company-locked-note no-print">
-        <div className="lock-icon">🔒</div>
+
+        <div className="lock-icon">
+          🔒
+        </div>
 
         <div>
+
           <strong>
             GNK company information is locked
           </strong>
 
           <p>
-            Company address, GSTIN, contact number,
-            bank details and declaration are controlled
-            by the application and are not editable from
-            the invoice screen.
+            Company address, GSTIN,
+            contact number, bank details
+            and declaration are controlled
+            by the application and are not
+            editable from the invoice screen.
           </p>
+
         </div>
 
       </div>
