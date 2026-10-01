@@ -1,5 +1,207 @@
 'use client';
-import {useEffect,useState} from 'react';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {money,dateDMY} from '@/lib/format';
-export default function Invoices(){const [data,setData]=useState<any[]>([]);const [loading,setLoading]=useState(true);const load=()=>fetch('/api/invoices').then(r=>r.json()).then(x=>setData(x.invoices||[])).finally(()=>setLoading(false));useEffect(()=>{load()},[]);return <main className="container"><div className="toolbar"><div><h1 style={{margin:'0 0 5px'}}>Invoices</h1><span className="muted">View, edit and export saved invoices.</span></div><div className="actions"><Link className="btn" href="/">+ New Invoice</Link></div></div><div className="table-wrap">{loading?<div style={{padding:25}}>Loading...</div>:<table className="data-table"><thead><tr><th>Invoice No</th><th>Type</th><th>Date</th><th>Bill To</th><th>Grand Total</th><th>Action</th></tr></thead><tbody>{data.length===0?<tr><td colSpan={6}>No invoices yet.</td></tr>:data.map(i=><tr key={i.id}><td><b>{i.invoice_no}</b></td><td><span className="badge">{i.invoice_type}</span></td><td>{dateDMY(i.invoice_date)}</td><td>{i.bill_to_name}</td><td>₹ {money(Number(i.grand_total))}</td><td><Link className="btn secondary" href={`/invoices/${i.id}`}>View / Edit</Link></td></tr>)}</tbody></table>}</div></main>}
+import { money, dateDMY } from '@/lib/format';
+
+type InvoiceType = 'catering' | 'housekeeping';
+
+export default function Invoices() {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [invoiceType, setInvoiceType] =
+    useState<InvoiceType>('catering');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const type =
+      params.get('type') === 'housekeeping'
+        ? 'housekeeping'
+        : 'catering';
+
+    setInvoiceType(type);
+
+    load(type);
+  }, []);
+
+  async function load(type: InvoiceType) {
+    try {
+      setLoading(true);
+
+      const response = await fetch('/api/invoices', {
+        cache: 'no-store',
+      });
+
+      const result = await response.json();
+
+      const allInvoices = result.invoices || [];
+
+      const filteredInvoices = allInvoices.filter(
+        (invoice: any) =>
+          invoice.invoice_type === type
+      );
+
+      setData(filteredInvoices);
+    } catch (error) {
+      console.error('Unable to load invoices:', error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const isHousekeeping =
+    invoiceType === 'housekeeping';
+
+  return (
+    <main className="container">
+
+      {/* PAGE HEADER */}
+      <div className="toolbar">
+
+        <div>
+          <h1 style={{ margin: '0 0 5px' }}>
+            {isHousekeeping
+              ? 'Housekeeping Bills History'
+              : 'Catering Bills History'}
+          </h1>
+
+          <span className="muted">
+            {isHousekeeping
+              ? 'View and manage saved housekeeping bills.'
+              : 'View and manage saved catering bills.'}
+          </span>
+        </div>
+
+        <div className="actions">
+
+          <Link
+            className="btn"
+            href={
+              isHousekeeping
+                ? '/invoices/new?type=housekeeping'
+                : '/invoices/new?type=catering'
+            }
+          >
+            {isHousekeeping
+              ? '+ New Housekeeping Invoice'
+              : '+ New Catering Invoice'}
+          </Link>
+
+        </div>
+
+      </div>
+
+
+      {/* HISTORY TABLE */}
+      <div className="table-wrap">
+
+        {loading ? (
+          <div style={{ padding: 25 }}>
+            Loading bills...
+          </div>
+        ) : (
+          <table className="data-table">
+
+            <thead>
+              <tr>
+                <th>Invoice No</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Grand Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {data.length === 0 ? (
+                <tr>
+                  <td colSpan={5}>
+                    No{' '}
+                    {isHousekeeping
+                      ? 'housekeeping'
+                      : 'catering'}{' '}
+                    bills found.
+                  </td>
+                </tr>
+              ) : (
+                data.map((invoice) => (
+                  <tr key={invoice.id}>
+
+                    {/* INVOICE NUMBER */}
+                    <td>
+                      <b>
+                        {invoice.invoice_no}
+                      </b>
+                    </td>
+
+                    {/* DATE */}
+                    <td>
+                      {dateDMY(
+                        invoice.invoice_date
+                      )}
+                    </td>
+
+                    {/* CUSTOMER */}
+                    <td>
+                      {invoice.bill_to_name}
+                    </td>
+
+                    {/* GRAND TOTAL */}
+                    <td>
+                      ₹{' '}
+                      {money(
+                        Number(
+                          invoice.grand_total
+                        )
+                      )}
+                    </td>
+
+                    {/* ACTIONS */}
+                    <td>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '8px',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                        }}
+                      >
+
+                        {/* VIEW / EDIT */}
+                        <Link
+                          className="btn secondary"
+                          href={`/invoices/${invoice.id}?edit=1`}
+                        >
+                          View / Edit
+                        </Link>
+
+                        {/* PDF DOWNLOAD */}
+                        <a
+                          className="btn secondary"
+                          href={`/api/invoices/${invoice.id}/pdf`}
+                        >
+                          PDF
+                        </a>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+                ))
+              )}
+
+            </tbody>
+
+          </table>
+        )}
+
+      </div>
+
+    </main>
+  );
+}
