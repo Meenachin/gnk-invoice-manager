@@ -24,7 +24,15 @@ export default function Home() {
             items, quantity, rate, CGST/SGST and bank details.
           </p>
 
-          <div className="actions">
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              marginTop: '18px',
+            }}
+          >
             <Link
               className="btn"
               href="/invoices/new?type=catering"
@@ -52,7 +60,15 @@ export default function Home() {
             structure, including work period and bill description.
           </p>
 
-          <div className="actions">
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              marginTop: '18px',
+            }}
+          >
             <Link
               className="btn"
               href="/invoices/new?type=housekeeping"
