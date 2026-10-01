@@ -10,6 +10,7 @@ import { calculateTotals } from '@/lib/invoice';
 type Props = {
   id?: string;
   type?: 'catering' | 'housekeeping';
+  edit?: boolean;
 };
 
 function createBlankInvoice(
@@ -117,6 +118,7 @@ function formatDate(value?: string | null) {
 export default function InvoiceEditor({
   id,
   type = 'catering',
+  edit = false,
 }: Props) {
   const [form, setForm] =
     useState<InvoiceInput>(
@@ -126,8 +128,7 @@ export default function InvoiceEditor({
   const [loading, setLoading] =
     useState(Boolean(id));
 
-  const [editing, setEditing] =
-    useState(!id);
+  const [editing, setEditing] = useState(!id || edit);
 
   const [saving, setSaving] =
     useState(false);
