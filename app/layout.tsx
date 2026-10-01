@@ -28,9 +28,7 @@ export default function RootLayout({
               <small>Catering &amp; Housekeeping</small>
             </Link>
 
-            <nav className="nav">
-              <Link href="/invoices">Invoices</Link>
-            </nav>
+          
           </header>
 
           {children}
