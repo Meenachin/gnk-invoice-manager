@@ -58,40 +58,46 @@ export default function Invoices() {
     <main className="container">
 
       {/* PAGE HEADER */}
-      <div className="toolbar">
+     <div
+  style={{
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '20px',
+    marginBottom: '20px',
+  }}
+>
+  <div>
+    <h1 style={{ margin: '0 0 5px' }}>
+      {isHousekeeping
+        ? 'Housekeeping Bills History'
+        : 'Catering Bills History'}
+    </h1>
 
-        <div>
-          <h1 style={{ margin: '0 0 5px' }}>
-            {isHousekeeping
-              ? 'Housekeeping Bills History'
-              : 'Catering Bills History'}
-          </h1>
+    <span className="muted">
+      {isHousekeeping
+        ? 'View and manage saved housekeeping bills.'
+        : 'View and manage saved catering bills.'}
+    </span>
+  </div>
 
-          <span className="muted">
-            {isHousekeeping
-              ? 'View and manage saved housekeeping bills.'
-              : 'View and manage saved catering bills.'}
-          </span>
-        </div>
-
-        <div className="actions">
-
-          <Link
-            className="btn"
-            href={
-              isHousekeeping
-                ? '/invoices/new?type=housekeeping'
-                : '/invoices/new?type=catering'
-            }
-          >
-            {isHousekeeping
-              ? '+ New Housekeeping Invoice'
-              : '+ New Catering Invoice'}
-          </Link>
-
-        </div>
-
-      </div>
+  <Link
+    className="btn"
+    href={
+      isHousekeeping
+        ? '/invoices/new?type=housekeeping'
+        : '/invoices/new?type=catering'
+    }
+    style={{
+      whiteSpace: 'nowrap',
+      flexShrink: 0,
+    }}
+  >
+    {isHousekeeping
+      ? '+ New Housekeeping Invoice'
+      : '+ New Catering Invoice'}
+  </Link>
+</div>
 
 
       {/* HISTORY TABLE */}
