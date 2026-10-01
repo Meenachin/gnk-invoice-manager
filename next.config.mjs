@@ -1,7 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['pdfkit'],
+  serverExternalPackages: ['pdfkit'],
+
+  outputFileTracingIncludes: {
+    '/*': [
+      './node_modules/pdfkit/js/standard-fonts/**/*',
+    ],
   },
 };
 
