@@ -180,38 +180,37 @@ function Catering({ invoice: i }: { invoice: Invoice }) {
   );
 }
 
-function Housekeeping({
-  invoice: i
-}: {
-  invoice: Invoice
-}) {
+function Housekeeping({ invoice: i }: { invoice: Invoice }) {
   return (
     <div className="paper hk">
-
-      <div className="hk-header">
-        <img
-          src="/gnk-header.png"
-          alt="GNK header"
-        />
-      </div>
-
+      {/* TITLE */}
       <div
         style={{
           textAlign: 'center',
           fontWeight: 700,
-          fontSize: 12,
-          marginBottom: 5
+          fontSize: 16,
+          marginBottom: 14,
+          textDecoration: 'underline',
         }}
       >
         GST TAX INVOICE
       </div>
 
-      <table className="invoice-table hk-paper">
+      {/* COMPANY + INVOICE DETAILS */}
+      <table
+        className="invoice-table hk-paper"
+        style={{ tableLayout: 'fixed' }}
+      >
         <tbody>
-
           <tr>
-            <td style={{ width: '50%' }}>
-              <b>{COMPANY.name}</b>
+            <td
+              colSpan={3}
+              style={{
+                width: '50%',
+                lineHeight: 1.45,
+              }}
+            >
+              <b>GNK Naveen Industrial Caterers and maintenance</b>
               <br />
               # 19-1-912/2
               <br />
@@ -226,63 +225,140 @@ function Housekeeping({
               Phone no : {COMPANY.phone}
             </td>
 
-            <td>
-              <b>INVOICE NO. {i.invoiceNo}</b>
-              <br />
-              <br />
-              Invoice date : {dateDMY(i.invoiceDate)}
-              <br />
-              Description of work : {i.workDescription}
-              <br />
-              Period of work :
-              {dateRange(i.periodFrom, i.periodTo)}
+            <td
+              colSpan={4}
+              style={{
+                width: '50%',
+                lineHeight: 1.55,
+              }}
+            >
+              <div>
+                <b>INVOICE NO. :</b> {i.invoiceNo}
+              </div>
+
+              <div>
+                <b>Invoice Date :</b> {dateDMY(i.invoiceDate)}
+              </div>
+
+              <div>
+                <b>Description of Work :</b>
+                <br />
+                {i.workDescription ||
+                  'Housekeeping and maintenance works'}
+              </div>
+
+              <div>
+                <b>Period of Work :</b>{' '}
+                {dateRange(i.periodFrom, i.periodTo)}
+              </div>
             </td>
           </tr>
 
+          {/* BUYER + BILL DESCRIPTION */}
           <tr>
-            <td>
-              Buyer
+            <td
+              colSpan={3}
+              style={{
+                width: '50%',
+                lineHeight: 1.45,
+              }}
+            >
+              <b>BUYER</b>
               <br />
+
               <b>{i.billToName}</b>
               <br />
+
               {i.billToAddress}
               <br />
-              GSTIN/UIN : {i.billToGstin}
+
+              GSTIN/UIN : {i.billToGstin || ''}
               <br />
-              State Name : {i.billToState}
+
+              State Name :{' '}
+              {i.billToState || 'Telangana, Code : 36'}
             </td>
 
-            <td>
-              <b>BILL Description :</b>
+            <td
+              colSpan={4}
+              style={{
+                width: '50%',
+                lineHeight: 1.45,
+              }}
+            >
+              <b>BILL DESCRIPTION</b>
               <br />
-              {i.billDescription}
+
+              {i.billDescription || ''}
             </td>
           </tr>
 
+          {/* ITEM TABLE HEADER */}
           <tr>
-            <th>S.No.</th>
-            <th>Description of Goods</th>
-            <th>HSN/SAC</th>
-            <th>Quantity</th>
-            <th>Rate</th>
-            <th>Per</th>
-            <th>Amount</th>
+            <th style={{ width: '7%' }}>S.No.</th>
+
+            <th style={{ width: '31%' }}>
+              Description of Goods
+            </th>
+
+            <th style={{ width: '13%' }}>
+              HSN/SAC
+            </th>
+
+            <th style={{ width: '12%' }}>
+              Quantity
+            </th>
+
+            <th style={{ width: '13%' }}>
+              Rate
+            </th>
+
+            <th style={{ width: '10%' }}>
+              Per
+            </th>
+
+            <th style={{ width: '14%' }}>
+              Amount
+            </th>
           </tr>
 
+          {/* ITEMS */}
           {i.lineItems.map((x, n) => (
             <tr key={n}>
-              <td>{n + 1}</td>
-              <td>{x.description}</td>
-              <td>{x.hsnSac}</td>
-              <td>{x.quantity}</td>
-              <td>{money(x.rate)}</td>
-              <td>{x.per}</td>
+              <td style={{ textAlign: 'center' }}>
+                {n + 1}
+              </td>
+
+              <td>
+                {x.description}
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                {x.hsnSac}
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                {x.quantity}
+              </td>
+
               <td style={{ textAlign: 'right' }}>
-                {money(x.quantity * x.rate)}
+                {money(x.rate)}
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                {x.per}
+              </td>
+
+              <td style={{ textAlign: 'right' }}>
+                {money(
+                  Number(x.quantity || 0) *
+                    Number(x.rate || 0)
+                )}
               </td>
             </tr>
           ))}
 
+          {/* TOTAL */}
           <tr>
             <td
               colSpan={6}
@@ -290,11 +366,13 @@ function Housekeeping({
             >
               <b>TOTAL</b>
             </td>
+
             <td style={{ textAlign: 'right' }}>
               {money(i.subtotal)}
             </td>
           </tr>
 
+          {/* CGST */}
           <tr>
             <td
               colSpan={6}
@@ -302,11 +380,13 @@ function Housekeeping({
             >
               CGST {i.cgstRate}%
             </td>
+
             <td style={{ textAlign: 'right' }}>
               {money(i.taxCgst)}
             </td>
           </tr>
 
+          {/* SGST */}
           <tr>
             <td
               colSpan={6}
@@ -314,64 +394,66 @@ function Housekeeping({
             >
               SGST {i.sgstRate}%
             </td>
+
             <td style={{ textAlign: 'right' }}>
               {money(i.taxSgst)}
             </td>
           </tr>
 
+          {/* GRAND TOTAL */}
           <tr>
             <td
               colSpan={6}
               style={{ textAlign: 'right' }}
             >
-              <b>TOTAL</b>
+              <b>GRAND TOTAL</b>
             </td>
+
             <td style={{ textAlign: 'right' }}>
               <b>{money(i.grandTotal)}</b>
             </td>
           </tr>
-
-          <tr>
-            <td colSpan={7}>
-              Amount Chargeable (in words):
-              {numberToIndianWords(i.grandTotal)}
-            </td>
-          </tr>
-
-          <tr>
-            <td colSpan={3}>
-              Account Details
-              <br />
-              Account no : {COMPANY.accountNumber}
-              <br />
-              Account Name : {COMPANY.name}
-              <br />
-              Account type : {COMPANY.accountType}
-              <br />
-              IFSC Code : {COMPANY.ifsc}
-              <br />
-              Branch Name : {COMPANY.branchName}
-            </td>
-
-            <td colSpan={4}>
-              <div
-                style={{
-                  textAlign: 'center',
-                  minHeight: 110
-                }}
-              >
-                For {COMPANY.name}
-                <br />
-                <br />
-                <br />
-                <b>Authorised Signatory</b>
-              </div>
-            </td>
-          </tr>
-
         </tbody>
       </table>
 
+      {/* AMOUNT IN WORDS */}
+      <div
+        className="amount-words"
+        style={{ marginTop: 8 }}
+      >
+        <b>AMOUNT CHARGEABLE IN WORDS :</b>{' '}
+        {numberToIndianWords(i.grandTotal)}
+      </div>
+
+      {/* ACCOUNT + SIGNATURE */}
+      <div
+        className="bottom-grid"
+        style={{ marginTop: 8 }}
+      >
+        <div>
+          <b>ACCOUNT DETAILS</b>
+          <br />
+          BANK NAME : {COMPANY.bankName}
+          <br />
+          BRANCH NAME : {COMPANY.branchName}
+          <br />
+          ACCOUNT NUMBER : {COMPANY.accountNumber}
+          <br />
+          ACCOUNT TYPE : {COMPANY.accountType}
+          <br />
+          IFSC CODE : {COMPANY.ifsc}
+        </div>
+
+        <div>
+          <b>AUTHORISED SIGNATURE</b>
+
+          <div className="signature">
+            <b>
+              GNK NAVEEN INDUSTRIAL CATERERS & MAINTAINANCE
+            </b>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
