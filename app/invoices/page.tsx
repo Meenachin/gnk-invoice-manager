@@ -186,13 +186,12 @@ export default function Invoices() {
                         </Link>
 
                         {/* PDF DOWNLOAD */}
-                       <button
-  type="button"
+                      <Link
   className="btn secondary"
-  onClick={() => window.print()}
+  href={`/invoices/${invoice.id}?print=1`}
 >
   Print
-</button>
+</Link>
 
                       </div>
 
