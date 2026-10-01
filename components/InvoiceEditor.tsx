@@ -11,6 +11,7 @@ type Props = {
   id?: string;
   type?: 'catering' | 'housekeeping';
   edit?: boolean;
+  print?: boolean;
 };
 
 function createBlankInvoice(
@@ -119,6 +120,7 @@ export default function InvoiceEditor({
   id,
   type = 'catering',
   edit = false,
+  print = false,
 }: Props) {
   const [form, setForm] =
     useState<InvoiceInput>(
@@ -295,7 +297,17 @@ export default function InvoiceEditor({
       cancelled = true;
     };
   }, [id]);
+  useEffect(() => {
+    if (!print || loading || !id) return;
 
+    const timer = window.setTimeout(() => {
+      window.print();
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [print, loading, id]);
   /*
    * UPDATE FIELD
    */
@@ -541,7 +553,13 @@ export default function InvoiceEditor({
       </div>
     );
   }
-
+  if (print) {
+    return (
+      <div className="invoice-page">
+        <InvoicePreview invoice={invoice} />
+      </div>
+    );
+  }
   const isHousekeeping =
     form.invoiceType ===
     'housekeeping';
