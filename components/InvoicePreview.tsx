@@ -229,19 +229,54 @@ function Housekeeping({ invoice: i }: { invoice: Invoice }) {
         />
 
         {/* LOGO */}
-        <img
-          src="/gnk-header.png"
-          alt="GNK"
-          style={{
-            position: 'absolute',
-            left: '28px',
-            top: '10px',
-            width: '285px',
-            height: '105px',
-            objectFit: 'contain',
-            objectPosition: 'left center',
-          }}
-        />
+        <div
+  style={{
+    position: 'absolute',
+    left: '28px',
+    top: '28px',
+    width: '350px',
+    color: '#123F67',
+    lineHeight: 1.05,
+  }}
+>
+  <div
+    style={{
+      fontSize: '28px',
+      fontWeight: 900,
+      letterSpacing: '1px',
+    }}
+  >
+    GNK
+  </div>
+
+  <div
+    style={{
+      marginTop: '4px',
+      fontSize: '20px',
+      fontWeight: 800,
+    }}
+  >
+    NAVEEN INDUSTRIAL CATERERS
+  </div>
+
+  <div
+    style={{
+      fontSize: '20px',
+      fontWeight: 800,
+    }}
+  >
+    AND MAINTENANCE
+  </div>
+
+  <div
+    style={{
+      marginTop: '8px',
+      width: '300px',
+      height: '3px',
+      background: '#D9A441',
+    }}
+  />
+</div>
 
         {/* GST TITLE */}
         <div
@@ -257,8 +292,7 @@ function Housekeeping({ invoice: i }: { invoice: Invoice }) {
             letterSpacing: '0.5px',
           }}
         >
-          GST <span style={{ color: '#D9A441' }}>TAX INVOICE</span>
-
+          TAX <span style={{ color: '#D9A441' }}>INVOICE</span>
           <div
             style={{
               marginTop: '8px',
