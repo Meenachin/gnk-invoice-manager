@@ -806,7 +806,7 @@ doc
   .lineTo(pageW, 0)
   .lineTo(pageW, 112)
   .lineTo(390, 112)
-  .curveTo(360, 95, 340, 70, 300, 0)
+  .bezierCurveTo(330, 55, 355, 82, 405, 103)
   .fill();
 
 // Gold accent curve
@@ -814,7 +814,7 @@ doc
   .fillColor(gold)
   .moveTo(275, 0)
   .lineTo(292, 0)
-  .curveTo(330, 55, 355, 82, 405, 103)
+  .bezierCurveTo(330, 55, 355, 82, 405, 103)
   .lineTo(390, 112)
   .fill();
 
