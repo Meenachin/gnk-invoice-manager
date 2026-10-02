@@ -2376,75 +2376,6 @@ a {
 
 }
 
-
-@media (max-width: 600px) {
-
-  .invoice-page {
-    padding:
-      20px 10px 40px;
-  }
-
-  .invoice-page-header h1 {
-    font-size: 27px;
-  }
-
-  .title-row {
-    align-items: flex-start;
-  }
-
-  .editor-card {
-    padding:
-      19px 15px 20px;
-    border-radius: 11px;
-  }
-
-  .card-heading {
-    align-items: flex-start;
-  }
-
-  .items-heading {
-    flex-direction: column;
-  }
-
-  .items-heading .btn {
-    width: 100%;
-  }
-
-  /*
-     On small screens only, allow the
-     item table to scroll.
-  */
-  .items-editor {
-    overflow-x: auto;
-  }
-
-  .items-header,
-  .item-row {
-    min-width: 950px;
-  }
-
-  .tax-rates {
-    grid-template-columns: 1fr;
-  }
-
-  .save-actions {
-    flex-direction: column-reverse;
-  }
-
-  .save-actions .btn {
-    width: 100%;
-  }
-
-  .summary-details {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .preview-container.large-preview {
-    padding: 12px;
-  }
-
-}
 /* =========================================================
    GNK INVOICE FORM - FULL WIDTH
    ========================================================= */
@@ -2584,35 +2515,7 @@ a {
    MOBILE
    ========================================================= */
 
-@media (max-width: 600px) {
 
-  .invoice-page {
-    padding: 20px 12px 50px;
-  }
-
-  .editor-card {
-    padding: 18px !important;
-  }
-
-  .field-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .save-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
-  }
-
-  .save-actions {
-    width: 100%;
-  }
-
-  .save-actions button {
-    width: 100%;
-  }
-
-}
 /* =========================================================
    PRINT - PRINT ONLY THE ACTUAL INVOICE
    ========================================================= */
@@ -2794,6 +2697,11 @@ a {
    ONE PAGE A4 - MOBILE FRIENDLY
    ========================================================= */
 
+/* =========================================================
+   GNK INVOICE PRINT
+   ONE A4 PAGE
+   ========================================================= */
+
 @media print {
 
   @page {
@@ -2803,47 +2711,79 @@ a {
 
   html,
   body {
-    width: 210mm !important;
-    height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
+
+    width: 210mm !important;
+    min-width: 210mm !important;
+    height: 297mm !important;
+
     background: #ffffff !important;
 
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  body {
-    overflow: hidden !important;
+  /* HIDE APP UI */
+  .topbar,
+  .invoice-page-header,
+  .view-summary,
+  .company-locked-note,
+  .preview-heading,
+  .header-actions,
+  .header-left,
+  .back-link,
+  .status-badge,
+  .alert,
+  .preview-actions,
+  .save-bar,
+  .no-print {
+    display: none !important;
   }
 
-  /*
-     IMPORTANT:
-     Make the complete invoice fit INSIDE A4.
-  */
+  /* REMOVE OUTER SPACING */
+  .invoice-page,
+  .view-layout,
+  .full-preview-card,
+  .preview-container,
+  .large-preview {
+    width: 210mm !important;
+    max-width: 210mm !important;
 
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    box-shadow: none !important;
+
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  /* ACTUAL INVOICE */
   .paper,
   .paper.hk {
+    display: block !important;
+
     width: 210mm !important;
 
     /*
-       285mm instead of 297mm gives the browser
-       some safe space and prevents a second page.
+      Keep slightly below A4 height so the browser
+      does not create a second page.
     */
     height: 285mm !important;
     min-height: 285mm !important;
     max-height: 285mm !important;
 
-    margin: 0 auto !important;
-
+    margin: 0 !important;
     padding: 0 !important;
 
     box-sizing: border-box !important;
 
     overflow: hidden !important;
 
+    border: 0 !important;
     box-shadow: none !important;
-    border: none !important;
 
     page-break-before: avoid !important;
     page-break-after: avoid !important;
@@ -2857,11 +2797,7 @@ a {
     print-color-adjust: exact !important;
   }
 
-  /*
-     Preserve blue / gold / light-blue backgrounds
-     when saving as PDF.
-  */
-
+  /* KEEP BLUE / GOLD COLORS */
   .paper *,
   .paper.hk * {
     -webkit-print-color-adjust: exact !important;
