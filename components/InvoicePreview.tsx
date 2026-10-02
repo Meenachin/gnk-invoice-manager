@@ -229,55 +229,20 @@ function Housekeeping({ invoice: i }: { invoice: Invoice }) {
         />
 
         {/* LOGO */}
-        <div
+        
+<img
+  src="/gnk-logo-only.png"
+  alt="GNK Naveen Industrial Caterers and Maintenance"
   style={{
     position: 'absolute',
     left: '28px',
-    top: '28px',
-    width: '350px',
-    color: '#123F67',
-    lineHeight: 1.05,
+    top: '12px',
+    width: '360px',
+    height: '125px',
+    objectFit: 'contain',
+    objectPosition: 'left center',
   }}
->
-  <div
-    style={{
-      fontSize: '28px',
-      fontWeight: 900,
-      letterSpacing: '1px',
-    }}
-  >
-    GNK
-  </div>
-
-  <div
-    style={{
-      marginTop: '4px',
-      fontSize: '20px',
-      fontWeight: 800,
-    }}
-  >
-    NAVEEN INDUSTRIAL CATERERS
-  </div>
-
-  <div
-    style={{
-      fontSize: '20px',
-      fontWeight: 800,
-    }}
-  >
-    AND MAINTENANCE
-  </div>
-
-  <div
-    style={{
-      marginTop: '8px',
-      width: '300px',
-      height: '3px',
-      background: '#D9A441',
-    }}
-  />
-</div>
-
+/>
         {/* GST TITLE */}
         <div
           style={{
