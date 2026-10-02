@@ -44,7 +44,6 @@ function Catering({ invoice: i }: { invoice: Invoice }) {
               INVOICE DATE: {dateDMY(i.invoiceDate)}
             </td>
           </tr>
-
           <tr>
             <td colSpan={3}>
               <b>BILL TO</b>
