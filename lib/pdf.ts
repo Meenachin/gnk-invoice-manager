@@ -763,11 +763,43 @@ function drawCatering(
    HOUSEKEEPING PDF
    KEEPING ITS SEPARATE FORMAT
 ========================================================= */
-
 function drawHousekeeping(
   doc: PDFKit.PDFDocument,
   inv: Invoice
 ) {
+  const pageW = A4_W;
+  const pageH = A4_H;
+
+  const navy = '#123F67';
+  const lightBlue = '#EAF2F8';
+  const gold = '#D9A441';
+  const border = '#B8C7D3';
+
+  const margin = 28;
+  const x = margin;
+  const w = pageW - margin * 2;
+  const right = x + w;
+
+  /* =========================================================
+     TOP HEADER
+  ========================================================= */
+
+  // White page
+  doc.rect(0, 0, pageW, pageH).fill('#FFFFFF');
+
+  // Top navy band
+  doc
+    .fillColor(navy)
+    .rect(0, 0, pageW, 105)
+    .fill();
+
+  // Gold accent
+  doc
+    .fillColor(gold)
+    .rect(0, 101, pageW, 5)
+    .fill();
+
+  // Existing GNK logo
   const logoPath = path.join(
     process.cwd(),
     'public',
@@ -777,182 +809,279 @@ function drawHousekeeping(
   if (fs.existsSync(logoPath)) {
     doc.image(
       logoPath,
-      45,
-      20,
+      x + 8,
+      12,
       {
-        width: 505,
-        height: 113,
+        width: 270,
+        height: 75,
       }
     );
   }
 
+  // GST TAX INVOICE
   text(
     doc,
     'GST TAX INVOICE',
-    62,
-    144,
-    471,
-    14,
+    330,
+    25,
+    235,
+    30,
     {
       bold: true,
-      size: 8,
+      size: 21,
       align: 'center',
     }
   );
 
-  const x = 49;
-  const y = 154;
-  const w = 488;
-  const left = 236;
-  const right = w - left;
+  doc
+    .fillColor(gold)
+    .rect(400, 59, 135, 3)
+    .fill();
 
-  rect(doc, x, y, w, 405);
+  /* =========================================================
+     COMPANY + INVOICE INFORMATION
+  ========================================================= */
 
+  const topY = 120;
+  const infoH = 145;
+  const leftW = 275;
+  const rightW = w - leftW;
+
+  // Outer box
+  doc
+    .lineWidth(0.8)
+    .strokeColor(border)
+    .rect(x, topY, w, infoH)
+    .stroke();
+
+  // Divider
   line(
     doc,
-    x + left,
-    y,
-    x + left,
-    y + 156,
+    x + leftW,
+    topY,
+    x + leftW,
+    topY + infoH,
     0.8
   );
 
-  line(
+  // Company name
+  text(
     doc,
-    x,
-    y + 78,
-    x + w,
-    y + 78,
-    0.8
-  );
-
-  line(
-    doc,
-    x,
-    y + 156,
-    x + w,
-    y + 156,
-    0.8
+    COMPANY.name,
+    x + 12,
+    topY + 12,
+    leftW - 24,
+    20,
+    {
+      bold: true,
+      size: 11,
+    }
   );
 
   text(
     doc,
-    `${COMPANY.name.toUpperCase()}\n` +
-      `# ${COMPANY.address[0].replace(',', '')}\n` +
-      `${COMPANY.address[1].replace(',', '')}\n` +
+    `${COMPANY.address[0]}\n` +
+      `${COMPANY.address[1]}\n` +
       `State Name : Telangana, Code : 36\n` +
       `GSTIN/UIN : ${COMPANY.gstin}\n` +
       `Phone no : ${COMPANY.phone}`,
-    x + 5,
-    y + 5,
-    left - 10,
-    70,
+    x + 12,
+    topY + 38,
+    leftW - 24,
+    95,
     {
-      size: 7.2,
+      size: 9,
+    }
+  );
+
+  // Invoice details background
+  doc
+    .fillColor(lightBlue)
+    .rect(
+      x + leftW,
+      topY,
+      rightW,
+      infoH
+    )
+    .fill();
+
+  // Invoice details
+  text(
+    doc,
+    `INVOICE NO.        :  ${inv.invoiceNo}`,
+    x + leftW + 14,
+    topY + 14,
+    rightW - 28,
+    18,
+    {
       bold: true,
+      size: 9.5,
     }
   );
 
   text(
     doc,
-    `INVOICE NO. ${inv.invoiceNo}\n\n` +
-      `Invoice date : ${dateDMY(inv.invoiceDate)}\n` +
-      `Description of work : ${
-        inv.workDescription ||
-        'Housekeeping and maintenance works'
-      }\n` +
-      `Period of work : ${dateRange(
-        inv.periodFrom,
-        inv.periodTo
-      )}`,
-    x + left + 5,
-    y + 5,
-    right - 10,
-    68,
+    `INVOICE DATE       :  ${dateDMY(inv.invoiceDate)}`,
+    x + leftW + 14,
+    topY + 38,
+    rightW - 28,
+    18,
     {
-      size: 7.2,
+      bold: true,
+      size: 9.5,
     }
   );
 
   text(
     doc,
-    `Buyer\n` +
-      `${inv.billToName}\n` +
+    `DESCRIPTION OF WORK :`,
+    x + leftW + 14,
+    topY + 64,
+    rightW - 28,
+    16,
+    {
+      bold: true,
+      size: 9,
+    }
+  );
+
+  text(
+    doc,
+    inv.workDescription ||
+      'Housekeeping and maintenance works',
+    x + leftW + 14,
+    topY + 82,
+    rightW - 28,
+    25,
+    {
+      size: 9,
+    }
+  );
+
+  text(
+    doc,
+    `PERIOD OF WORK    :  ${dateRange(
+      inv.periodFrom,
+      inv.periodTo
+    )}`,
+    x + leftW + 14,
+    topY + 116,
+    rightW - 28,
+    18,
+    {
+      bold: true,
+      size: 9,
+    }
+  );
+
+  /* =========================================================
+     BUYER + BILL DESCRIPTION
+  ========================================================= */
+
+  const boxY = topY + infoH + 14;
+  const boxH = 108;
+  const gap = 5;
+  const boxW = (w - gap) / 2;
+
+  // BUYER
+  doc
+    .fillColor(navy)
+    .rect(x, boxY, boxW, 27)
+    .fill();
+
+  text(
+    doc,
+    'BUYER',
+    x + 12,
+    boxY + 7,
+    boxW - 24,
+    15,
+    {
+      bold: true,
+      size: 10,
+    }
+  );
+
+  doc
+    .lineWidth(0.8)
+    .strokeColor(border)
+    .rect(x, boxY, boxW, boxH)
+    .stroke();
+
+  text(
+    doc,
+    `${inv.billToName || ''}\n` +
       `${inv.billToAddress || ''}\n` +
-      `GSTIN/UIN        : ${inv.billToGstin || ''}\n` +
-      `State Name       : ${
+      `GSTIN/UIN : ${inv.billToGstin || ''}\n` +
+      `State Name : ${
         inv.billToState ||
         'Telangana, Code : 36'
       }`,
-    x + 5,
-    y + 82,
-    left - 10,
-    68,
+    x + 12,
+    boxY + 38,
+    boxW - 24,
+    boxH - 42,
     {
-      size: 7.1,
+      size: 9,
     }
   );
+
+  // BILL DESCRIPTION
+  const billX = x + boxW + gap;
+
+  doc
+    .fillColor(navy)
+    .rect(billX, boxY, boxW, 27)
+    .fill();
 
   text(
     doc,
-    `BILL Description :\n` +
-      `${inv.billDescription || ''}`,
-    x + left + 5,
-    y + 82,
-    right - 10,
-    68,
+    'BILL DESCRIPTION',
+    billX + 12,
+    boxY + 7,
+    boxW - 24,
+    15,
     {
-      size: 7.1,
+      bold: true,
+      size: 10,
     }
   );
 
-  const ty = y + 156;
+  doc
+    .lineWidth(0.8)
+    .strokeColor(border)
+    .rect(billX, boxY, boxW, boxH)
+    .stroke();
 
-  const cols = [
-    x,
-    x + 42,
-    x + 240,
-    x + 302,
-    x + 356,
-    x + 407,
-    x + w,
+  text(
+    doc,
+    inv.billDescription || '',
+    billX + 12,
+    boxY + 38,
+    boxW - 24,
+    boxH - 42,
+    {
+      size: 9,
+    }
+  );
+
+  /* =========================================================
+     ITEMS TABLE
+  ========================================================= */
+
+  const tableY = boxY + boxH + 14;
+
+  const columns = [
+    45,   // S.No.
+    205,  // Description
+    78,   // HSN/SAC
+    70,   // Quantity
+    70,   // Rate
+    60,   // Per
+    w - 45 - 205 - 78 - 70 - 70 - 60,
   ];
 
-  const hh = 22;
-
-  const visibleItems =
-    inv.lineItems.slice(0, 8);
-
-  const itemArea = Math.max(
-    100,
-    visibleItems.length * 28
-  );
-
-  const tableH =
-    hh +
-    itemArea +
-    80;
-
-  rect(
-    doc,
-    x,
-    ty,
-    w,
-    tableH
-  );
-
-  cols.forEach((cx) => {
-    line(
-      doc,
-      cx,
-      ty,
-      cx,
-      ty + tableH,
-      0.6
-    );
-  });
-
-  [
+  const tableHeaders = [
     'S.No.',
     'Description of Goods',
     'HSN/SAC',
@@ -960,74 +1089,137 @@ function drawHousekeeping(
     'Rate',
     'Per',
     'Amount',
-  ].forEach((header, i) => {
+  ];
+
+  const tableHeaderH = 32;
+
+  const items =
+    inv.lineItems.length > 0
+      ? inv.lineItems.slice(0, 8)
+      : [
+          {
+            description: '',
+            quantity: 0,
+            rate: 0,
+            per: '',
+            hsnSac: '',
+          },
+        ];
+
+  const rowH = 27;
+  const itemsH = items.length * rowH;
+
+  const totalsH = 4 * 27;
+
+  const tableH =
+    tableHeaderH +
+    itemsH +
+    totalsH;
+
+  // Outer table
+  doc
+    .lineWidth(0.8)
+    .strokeColor(border)
+    .rect(x, tableY, w, tableH)
+    .stroke();
+
+  // Header background
+  doc
+    .fillColor(navy)
+    .rect(
+      x,
+      tableY,
+      w,
+      tableHeaderH
+    )
+    .fill();
+
+  // Column positions
+  const cols = [x];
+
+  for (const width of columns) {
+    cols.push(
+      cols[cols.length - 1] + width
+    );
+  }
+
+  // Vertical lines
+  for (let i = 1; i < cols.length - 1; i++) {
+    line(
+      doc,
+      cols[i],
+      tableY,
+      cols[i],
+      tableY + tableH,
+      0.5
+    );
+  }
+
+  // Header text
+  for (
+    let i = 0;
+    i < tableHeaders.length;
+    i++
+  ) {
     text(
       doc,
-      header,
+      tableHeaders[i],
       cols[i] + 3,
-      ty + 5,
-      cols[i + 1] - cols[i] - 6,
+      tableY + 9,
+      columns[i] - 6,
       15,
       {
         bold: true,
-        size: 6.7,
+        size: 7.5,
         align:
           i === 1
             ? 'left'
             : 'center',
       }
     );
-  });
+  }
 
-  line(
-    doc,
-    x,
-    ty + hh,
-    x + w,
-    ty + hh,
-    0.6
-  );
+  // Item rows
+  items.forEach((item, index) => {
+    const rowY =
+      tableY +
+      tableHeaderH +
+      index * rowH;
 
-  const rowH = itemArea;
-
-  visibleItems.forEach((item, index) => {
-    const yy =
-      ty +
-      hh +
-      (index * rowH) /
-        Math.max(
-          1,
-          visibleItems.length
-        );
-
-    const rh =
-      rowH /
-      Math.max(
-        1,
-        visibleItems.length
-      );
+    if (index % 2 === 1) {
+      doc
+        .fillColor('#F3F7FA')
+        .rect(
+          x,
+          rowY,
+          w,
+          rowH
+        )
+        .fill();
+    }
 
     text(
       doc,
       String(index + 1),
       cols[0] + 3,
-      yy + 7,
-      35,
-      rh,
+      rowY + 8,
+      columns[0] - 6,
+      15,
       {
-        size: 6.8,
+        size: 8,
+        align: 'center',
       }
     );
 
     text(
       doc,
-      item.description,
+      item.description || '',
       cols[1] + 5,
-      yy + 7,
-      cols[2] - cols[1] - 10,
-      rh,
+      rowY + 8,
+      columns[1] - 10,
+      15,
       {
-        size: 6.8,
+        size: 8,
       }
     );
 
@@ -1035,24 +1227,24 @@ function drawHousekeeping(
       doc,
       item.hsnSac || '998533',
       cols[2] + 3,
-      yy + 7,
-      cols[3] - cols[2] - 6,
-      rh,
+      rowY + 8,
+      columns[2] - 6,
+      15,
       {
-        size: 6.8,
+        size: 8,
         align: 'center',
       }
     );
 
     text(
       doc,
-      String(item.quantity),
+      String(item.quantity ?? ''),
       cols[3] + 3,
-      yy + 7,
-      cols[4] - cols[3] - 6,
-      rh,
+      rowY + 8,
+      columns[3] - 6,
+      15,
       {
-        size: 6.8,
+        size: 8,
         align: 'center',
       }
     );
@@ -1061,12 +1253,12 @@ function drawHousekeeping(
       doc,
       money(item.rate),
       cols[4] + 3,
-      yy + 7,
-      cols[5] - cols[4] - 6,
-      rh,
+      rowY + 8,
+      columns[4] - 6,
+      15,
       {
-        size: 6.8,
-        align: 'center',
+        size: 8,
+        align: 'right',
       }
     );
 
@@ -1074,11 +1266,11 @@ function drawHousekeeping(
       doc,
       item.per || 'Quantity',
       cols[5] + 3,
-      yy + 7,
-      cols[6] - cols[5] - 6,
-      rh,
+      rowY + 8,
+      columns[5] - 6,
+      15,
       {
-        size: 6.8,
+        size: 8,
         align: 'center',
       }
     );
@@ -1090,11 +1282,11 @@ function drawHousekeeping(
           Number(item.rate || 0)
       ),
       cols[6] + 3,
-      yy + 7,
-      45,
-      rh,
+      rowY + 8,
+      columns[6] - 6,
+      15,
       {
-        size: 6.8,
+        size: 8,
         align: 'right',
       }
     );
@@ -1102,142 +1294,274 @@ function drawHousekeeping(
     line(
       doc,
       x,
-      yy + rh,
-      x + w,
-      yy + rh,
-      0.4
+      rowY + rowH,
+      right,
+      rowY + rowH,
+      0.45
     );
   });
 
-  const sy =
-    ty +
-    hh +
-    itemArea;
+  /* =========================================================
+     TOTALS
+  ========================================================= */
 
-  const totalLabels = [
+  const totalsY =
+    tableY +
+    tableHeaderH +
+    itemsH;
+
+  const labels = [
     'TOTAL',
-    `CGST ${inv.cgstRate}%`,
-    `SGST ${inv.sgstRate}%`,
-    'TOTAL',
+    `CGST @ ${inv.cgstRate}%`,
+    `SGST @ ${inv.sgstRate}%`,
+    'GRAND TOTAL',
   ];
 
-  const totalValues = [
+  const values = [
     inv.subtotal,
     inv.taxCgst,
     inv.taxSgst,
     inv.grandTotal,
   ];
 
-  totalLabels.forEach((label, index) => {
-    const yy = sy + index * 20;
+  for (let i = 0; i < 4; i++) {
+    const yy =
+      totalsY +
+      i * 27;
+
+    if (i === 3) {
+      doc
+        .fillColor(navy)
+        .rect(
+          cols[5],
+          yy,
+          columns[5] + columns[6],
+          27
+        )
+        .fill();
+    } else {
+      doc
+        .fillColor(lightBlue)
+        .rect(
+          cols[5],
+          yy,
+          columns[5] + columns[6],
+          27
+        )
+        .fill();
+    }
 
     text(
       doc,
-      label,
-      x + 240,
-      yy + 4,
-      167,
-      13,
+      labels[i],
+      cols[5] + 5,
+      yy + 7,
+      columns[5] - 10,
+      15,
       {
-        size: 6.8,
+        bold: true,
+        size: i === 3 ? 9 : 8,
         align: 'right',
-        bold: index === 3,
       }
     );
 
     text(
       doc,
-      money(totalValues[index]),
-      x + 407,
-      yy + 4,
-      76,
-      13,
+      money(values[i]),
+      cols[6] + 5,
+      yy + 7,
+      columns[6] - 10,
+      15,
       {
-        size: 6.8,
+        bold: true,
+        size: i === 3 ? 10 : 8,
         align: 'right',
-        bold: index === 3,
       }
     );
 
     line(
       doc,
-      x + 240,
-      yy,
-      x + w,
-      yy,
+      cols[5],
+      yy + 27,
+      right,
+      yy + 27,
       0.4
     );
-  });
+  }
+
+  /* =========================================================
+     AMOUNT IN WORDS
+  ========================================================= */
 
   const wordsY =
-    ty +
-    hh +
-    itemArea +
-    80;
+    tableY + tableH + 12;
+
+  doc
+    .fillColor(lightBlue)
+    .rect(x, wordsY, w, 55)
+    .fill();
+
+  doc
+    .lineWidth(0.8)
+    .strokeColor(border)
+    .rect(x, wordsY, w, 55)
+    .stroke();
 
   text(
     doc,
-    `Amount Chargeable (in words): ${numberToIndianWords(
-      inv.grandTotal
-    )}`,
-    x + 5,
-    wordsY + 7,
-    w - 10,
-    22,
-    {
-      size: 6.8,
-    }
-  );
-
-  text(
-    doc,
-    `Account Details\n` +
-      `Account no : ${COMPANY.accountNumber}\n` +
-      `Account Name : ${COMPANY.name}\n` +
-      `Account type : ${COMPANY.accountType}\n` +
-      `IFSC Code : ${COMPANY.ifsc}\n` +
-      `Branch Name : ${COMPANY.branchName}`,
-    x + 5,
-    wordsY + 34,
-    260,
-    70,
-    {
-      size: 6.8,
-    }
-  );
-
-  rect(
-    doc,
-    x + 260,
-    wordsY + 30,
-    228,
-    82,
-    0.6
-  );
-
-  text(
-    doc,
-    `For ${COMPANY.name}`,
-    x + 270,
-    wordsY + 36,
-    208,
+    'AMOUNT CHARGEABLE IN WORDS :',
+    x + 12,
+    wordsY + 10,
+    w - 24,
     15,
     {
-      size: 6.8,
+      bold: true,
+      size: 8.5,
+    }
+  );
+
+  text(
+    doc,
+    numberToIndianWords(
+      inv.grandTotal
+    ),
+    x + 12,
+    wordsY + 28,
+    w - 24,
+    20,
+    {
+      size: 8.5,
+    }
+  );
+
+  /* =========================================================
+     ACCOUNT DETAILS + SIGNATURE
+  ========================================================= */
+
+  const footerY =
+    wordsY + 67;
+
+  const footerH = 115;
+  const half = w / 2;
+
+  // Account box
+  doc
+    .fillColor(navy)
+    .rect(x, footerY, half - 4, 27)
+    .fill();
+
+  text(
+    doc,
+    'ACCOUNT DETAILS',
+    x + 12,
+    footerY + 7,
+    half - 28,
+    15,
+    {
+      bold: true,
+      size: 10,
+    }
+  );
+
+  doc
+    .lineWidth(0.8)
+    .strokeColor(border)
+    .rect(
+      x,
+      footerY,
+      half - 4,
+      footerH
+    )
+    .stroke();
+
+  text(
+    doc,
+    `BANK NAME       : ${COMPANY.bankName}\n` +
+      `BRANCH NAME     : ${COMPANY.branchName}\n` +
+      `ACCOUNT NUMBER  : ${COMPANY.accountNumber}\n` +
+      `ACCOUNT TYPE    : ${COMPANY.accountType}\n` +
+      `IFSC CODE       : ${COMPANY.ifsc}`,
+    x + 12,
+    footerY + 40,
+    half - 28,
+    70,
+    {
+      size: 8.5,
+    }
+  );
+
+  // Signature box
+  const sigX = x + half + 4;
+
+  doc
+    .fillColor(navy)
+    .rect(
+      sigX,
+      footerY,
+      half - 4,
+      27
+    )
+    .fill();
+
+  text(
+    doc,
+    'AUTHORISED SIGNATURE',
+    sigX + 12,
+    footerY + 7,
+    half - 28,
+    15,
+    {
+      bold: true,
+      size: 10,
+    }
+  );
+
+  doc
+    .lineWidth(0.8)
+    .strokeColor(border)
+    .rect(
+      sigX,
+      footerY,
+      half - 4,
+      footerH
+    )
+    .stroke();
+
+  line(
+    doc,
+    sigX + 30,
+    footerY + 82,
+    sigX + half - 34,
+    footerY + 82,
+    0.8
+  );
+
+  text(
+    doc,
+    'GNK NAVEEN INDUSTRIAL CATERERS & MAINTAINANCE',
+    sigX + 15,
+    footerY + 92,
+    half - 30,
+    18,
+    {
+      bold: true,
+      size: 7.5,
       align: 'center',
     }
   );
 
-  text(
-    doc,
-    'Authorised Signatory',
-    x + 340,
-    wordsY + 80,
-    130,
-    14,
-    {
-      size: 6.8,
-      align: 'right',
-    }
-  );
+  /* =========================================================
+     BOTTOM GOLD/NAVY ACCENT
+  ========================================================= */
+
+  doc
+    .fillColor(gold)
+    .rect(0, pageH - 13, pageW, 5)
+    .fill();
+
+  doc
+    .fillColor(navy)
+    .rect(0, pageH - 8, pageW, 8)
+    .fill();
 }
+    
