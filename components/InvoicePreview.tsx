@@ -17,164 +17,702 @@ export default function InvoicePreview({
 
 function Catering({ invoice: i }: { invoice: Invoice }) {
   return (
-    <div className="paper">
-      <div className="invoice-title">Taxable Invoice</div>
+    <div
+      className="paper"
+      style={{
+        background: '#ffffff',
+        padding: 0,
+        overflow: 'hidden',
+        border: 'none',
+      }}
+    >
 
-      <table className="invoice-table">
-        <tbody>
+      {/* ================= TOP BLUE / GOLD HEADER ================= */}
 
-          <tr>
-            <td colSpan={3}>
-              <b>{COMPANY.name}</b>
-              <br />
-              {COMPANY.address.join('\n')}
-              <br />
-              Contact no : {COMPANY.phone}
-              <br />
-              GST IN : {COMPANY.gstin}
-              <br />
-              H/K code : {COMPANY.hkCode}
-              <br />
-              SAC CODE : {COMPANY.sacCode}
-            </td>
+      <div
+        style={{
+          position: 'relative',
+          height: '145px',
+          background: '#ffffff',
+          overflow: 'hidden',
+        }}
+      >
 
-            <td colSpan={3}>
-              INVOICE No : {i.invoiceNo}
-              <br />
-              INVOICE DATE: {dateDMY(i.invoiceDate)}
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={3}>
-              <b>BILL TO</b>
-              <br />
-              {i.billToName}
-              <br />
-              {i.billToAddress}
-              <br />
-              GST NO : {i.billToGstin}
-            </td>
+        {/* BLUE RIGHT SHAPE */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '55%',
+            height: '120px',
+            background: '#123F67',
+            borderBottomLeftRadius: '90px',
+          }}
+        />
 
-            <td colSpan={3}>
-              <b>Description:</b> {i.billDescription}
-            </td>
-          </tr>
+        {/* GOLD ACCENT */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: '42%',
+            width: '18px',
+            height: '115px',
+            background: '#D9A441',
+            transform: 'rotate(-38deg)',
+            transformOrigin: 'top',
+          }}
+        />
 
-          <tr>
-            <th style={{ width: '7%' }}>SNO</th>
-            <th style={{ width: '31%' }}>DESCRIPTION</th>
-            <th>QUANTITY</th>
-            <th>RATE</th>
-            <th>PER</th>
-            <th style={{ width: '17%' }}>AMOUNT IN Rs.</th>
-          </tr>
+        {/* GNK LOGO */}
+        <img
+          src="/gnk-logo-only.png"
+          alt="GNK Naveen Industrial Caterers and Maintenance"
+          style={{
+            position: 'absolute',
+            left: '28px',
+            top: '12px',
+            width: '360px',
+            height: '125px',
+            objectFit: 'contain',
+            objectPosition: 'left center',
+          }}
+        />
 
-          {i.lineItems.map((x, n) => (
-            <tr key={n}>
-              <td>{n + 1}</td>
-              <td>{x.description}</td>
-              <td style={{ textAlign: 'center' }}>
-                {x.quantity}
-              </td>
-              <td style={{ textAlign: 'right' }}>
-                {money(x.rate)}
-              </td>
-              <td style={{ textAlign: 'center' }}>
-                {x.per}
-              </td>
-              <td style={{ textAlign: 'right' }}>
-                {money(x.quantity * x.rate)}
-              </td>
-            </tr>
-          ))}
+        {/* TAX INVOICE */}
+        <div
+          style={{
+            position: 'absolute',
+            right: '35px',
+            top: '30px',
+            width: '330px',
+            color: '#ffffff',
+            fontSize: '25px',
+            fontWeight: 800,
+            textAlign: 'right',
+            letterSpacing: '0.5px',
+          }}
+        >
+          TAX <span style={{ color: '#D9A441' }}>INVOICE</span>
 
-          <tr>
-            <td
-              colSpan={5}
-              style={{ textAlign: 'right' }}
-            >
-              <b>TOTAL</b>
-            </td>
-            <td style={{ textAlign: 'right' }}>
-              {money(i.subtotal)}
-            </td>
-          </tr>
-
-          <tr>
-            <td
-              colSpan={5}
-              style={{ textAlign: 'right' }}
-            >
-              CGST {i.cgstRate}%
-            </td>
-            <td style={{ textAlign: 'right' }}>
-              {money(i.taxCgst)}
-            </td>
-          </tr>
-
-          <tr>
-            <td
-              colSpan={5}
-              style={{ textAlign: 'right' }}
-            >
-              SGST {i.sgstRate}%
-            </td>
-            <td style={{ textAlign: 'right' }}>
-              {money(i.taxSgst)}
-            </td>
-          </tr>
-
-          <tr>
-            <td
-              colSpan={5}
-              style={{ textAlign: 'right' }}
-            >
-              <b>GRAND TOTAL</b>
-            </td>
-            <td style={{ textAlign: 'right' }}>
-              <b>{money(i.grandTotal)}</b>
-            </td>
-          </tr>
-
-        </tbody>
-      </table>
-
-      <div className="amount-words">
-        AMOUNT CHARGEABLE IN WORDS :
-        {numberToIndianWords(i.grandTotal)}
+          <div
+            style={{
+              marginTop: '8px',
+              marginLeft: 'auto',
+              width: '175px',
+              height: '3px',
+              background: '#D9A441',
+            }}
+          />
+        </div>
       </div>
 
-      <div className="bottom-grid">
 
-        <div>
-          <b>DECLARATION :</b>
+      {/* ================= COMPANY + INVOICE DETAILS ================= */}
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '8px',
+          margin: '0 18px 10px',
+        }}
+      >
+
+        {/* COMPANY */}
+        <div
+          style={{
+            border: '1px solid #B8C7D3',
+            padding: '12px',
+            minHeight: '135px',
+            fontSize: '10px',
+            lineHeight: 1.45,
+          }}
+        >
+          <div
+            style={{
+              color: '#123F67',
+              fontSize: '13px',
+              fontWeight: 800,
+              marginBottom: '5px',
+            }}
+          >
+            GNK Naveen Industrial Caterers
+            <br />
+            and Maintenance
+          </div>
+
+          {COMPANY.address[0]}
           <br />
-          {COMPANY.declaration}
+          {COMPANY.address[1]}
+          <br />
+          Contact no : {COMPANY.phone}
+          <br />
+          GST IN : {COMPANY.gstin}
+          <br />
+          H/K code : {COMPANY.hkCode}
+          <br />
+          SAC CODE : {COMPANY.sacCode}
         </div>
 
-        <div>
-          <b>COMPANY BANK DETAILS :</b>
-          <br />
-          BANK NAME : {COMPANY.bankName}
-          <br />
-          BRANCH NAME : {COMPANY.branchName}
-          <br />
-          ACCOUNT NUMBER : {COMPANY.accountNumber}
-          <br />
-          ACCOUNT TYPE : {COMPANY.accountType}
-          <br />
-          IFSC CODE : {COMPANY.ifsc}
 
-          <div className="signature">
-            <b>AUTHORISED SIGNATURE</b>
+        {/* INVOICE DETAILS */}
+        <div
+          style={{
+            background: '#EAF2F8',
+            border: '1px solid #B8C7D3',
+            padding: '12px',
+            minHeight: '135px',
+            fontSize: '10px',
+            lineHeight: 1.6,
+          }}
+        >
+          <div>
+            <b style={{ color: '#123F67' }}>
+              INVOICE NO :
+            </b>{' '}
+            {i.invoiceNo}
+          </div>
+
+          <div>
+            <b style={{ color: '#123F67' }}>
+              INVOICE DATE :
+            </b>{' '}
+            {dateDMY(i.invoiceDate)}
+          </div>
+
+          <div style={{ marginTop: '12px' }}>
+            <b style={{ color: '#123F67' }}>
+              DESCRIPTION :
+            </b>
             <br />
+            {i.billDescription || ''}
+          </div>
+        </div>
+      </div>
+
+
+      {/* ================= BILL TO + DESCRIPTION ================= */}
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '6px',
+          margin: '0 18px 10px',
+        }}
+      >
+
+        {/* BILL TO */}
+        <div
+          style={{
+            border: '1px solid #B8C7D3',
+          }}
+        >
+          <div
+            style={{
+              background: '#123F67',
+              color: '#ffffff',
+              padding: '8px 12px',
+              fontSize: '12px',
+              fontWeight: 800,
+            }}
+          >
+            BILL TO
+          </div>
+
+          <div
+            style={{
+              padding: '10px 12px',
+              minHeight: '75px',
+              fontSize: '10px',
+              lineHeight: 1.5,
+            }}
+          >
+            <b>{i.billToName}</b>
             <br />
-            (GNK NAVEEN INDUSTRIAL CATERERS &
-            MAINTAINANCE)
+            {i.billToAddress}
+            <br />
+            GST NO : {i.billToGstin || ''}
           </div>
         </div>
 
+
+        {/* DESCRIPTION */}
+        <div
+          style={{
+            border: '1px solid #B8C7D3',
+          }}
+        >
+          <div
+            style={{
+              background: '#123F67',
+              color: '#ffffff',
+              padding: '8px 12px',
+              fontSize: '12px',
+              fontWeight: 800,
+            }}
+          >
+            DESCRIPTION
+          </div>
+
+          <div
+            style={{
+              padding: '10px 12px',
+              minHeight: '75px',
+              fontSize: '10px',
+              lineHeight: 1.5,
+            }}
+          >
+            {i.billDescription || ''}
+          </div>
+        </div>
       </div>
+
+
+      {/* ================= CATERING ITEMS ================= */}
+
+      <div style={{ margin: '0 18px' }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            tableLayout: 'fixed',
+            fontSize: '9px',
+          }}
+        >
+          <thead>
+            <tr
+              style={{
+                background: '#123F67',
+                color: '#ffffff',
+              }}
+            >
+              <th
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px 5px',
+                  width: '7%',
+                }}
+              >
+                SNO
+              </th>
+
+              <th
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px 5px',
+                  width: '31%',
+                }}
+              >
+                DESCRIPTION
+              </th>
+
+              <th
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px 5px',
+                  width: '15%',
+                }}
+              >
+                QUANTITY
+              </th>
+
+              <th
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px 5px',
+                  width: '15%',
+                }}
+              >
+                RATE
+              </th>
+
+              <th
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px 5px',
+                  width: '15%',
+                }}
+              >
+                PER
+              </th>
+
+              <th
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px 5px',
+                  width: '17%',
+                }}
+              >
+                AMOUNT IN Rs.
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {i.lineItems.map((x, n) => (
+              <tr
+                key={n}
+                style={{
+                  background:
+                    n % 2 === 0
+                      ? '#ffffff'
+                      : '#EAF2F8',
+                }}
+              >
+                <td
+                  style={{
+                    border: '1px solid #B8C7D3',
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  {n + 1}
+                </td>
+
+                <td
+                  style={{
+                    border: '1px solid #B8C7D3',
+                    padding: '8px',
+                  }}
+                >
+                  {x.description}
+                </td>
+
+                <td
+                  style={{
+                    border: '1px solid #B8C7D3',
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  {x.quantity}
+                </td>
+
+                <td
+                  style={{
+                    border: '1px solid #B8C7D3',
+                    padding: '8px',
+                    textAlign: 'right',
+                  }}
+                >
+                  {money(x.rate)}
+                </td>
+
+                <td
+                  style={{
+                    border: '1px solid #B8C7D3',
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  {x.per}
+                </td>
+
+                <td
+                  style={{
+                    border: '1px solid #B8C7D3',
+                    padding: '8px',
+                    textAlign: 'right',
+                  }}
+                >
+                  {money(
+                    Number(x.quantity || 0) *
+                    Number(x.rate || 0)
+                  )}
+                </td>
+              </tr>
+            ))}
+
+            {/* TOTAL */}
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px',
+                  textAlign: 'right',
+                  background: '#EAF2F8',
+                  fontWeight: 700,
+                }}
+              >
+                TOTAL
+              </td>
+
+              <td
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px',
+                  textAlign: 'right',
+                  background: '#EAF2F8',
+                  fontWeight: 700,
+                }}
+              >
+                {money(i.subtotal)}
+              </td>
+            </tr>
+
+            {/* CGST */}
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px',
+                  textAlign: 'right',
+                  background: '#EAF2F8',
+                }}
+              >
+                CGST {i.cgstRate}%
+              </td>
+
+              <td
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px',
+                  textAlign: 'right',
+                  background: '#EAF2F8',
+                }}
+              >
+                {money(i.taxCgst)}
+              </td>
+            </tr>
+
+            {/* SGST */}
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px',
+                  textAlign: 'right',
+                  background: '#EAF2F8',
+                }}
+              >
+                SGST {i.sgstRate}%
+              </td>
+
+              <td
+                style={{
+                  border: '1px solid #B8C7D3',
+                  padding: '8px',
+                  textAlign: 'right',
+                  background: '#EAF2F8',
+                }}
+              >
+                {money(i.taxSgst)}
+              </td>
+            </tr>
+
+            {/* GRAND TOTAL */}
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  border: '1px solid #123F67',
+                  padding: '10px',
+                  textAlign: 'right',
+                  background: '#123F67',
+                  color: '#ffffff',
+                  fontWeight: 800,
+                }}
+              >
+                GRAND TOTAL
+              </td>
+
+              <td
+                style={{
+                  border: '1px solid #123F67',
+                  padding: '10px',
+                  textAlign: 'right',
+                  background: '#123F67',
+                  color: '#ffffff',
+                  fontWeight: 800,
+                }}
+              >
+                {money(i.grandTotal)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      {/* ================= AMOUNT IN WORDS ================= */}
+
+      <div
+        style={{
+          margin: '10px 18px',
+          padding: '10px 12px',
+          background: '#EAF2F8',
+          border: '1px solid #B8C7D3',
+          fontSize: '10px',
+          lineHeight: 1.5,
+        }}
+      >
+        <b style={{ color: '#123F67' }}>
+          AMOUNT CHARGEABLE IN WORDS :
+        </b>{' '}
+        {numberToIndianWords(i.grandTotal)}
+      </div>
+
+
+      {/* ================= DECLARATION + BANK ================= */}
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '6px',
+          margin: '0 18px',
+        }}
+      >
+
+        {/* DECLARATION */}
+        <div
+          style={{
+            border: '1px solid #B8C7D3',
+          }}
+        >
+          <div
+            style={{
+              background: '#123F67',
+              color: '#ffffff',
+              padding: '8px 12px',
+              fontSize: '12px',
+              fontWeight: 800,
+            }}
+          >
+            DECLARATION
+          </div>
+
+          <div
+            style={{
+              padding: '10px 12px',
+              minHeight: '105px',
+              fontSize: '9px',
+              lineHeight: 1.5,
+            }}
+          >
+            {COMPANY.declaration}
+          </div>
+        </div>
+
+
+        {/* BANK DETAILS */}
+        <div
+          style={{
+            border: '1px solid #B8C7D3',
+          }}
+        >
+          <div
+            style={{
+              background: '#123F67',
+              color: '#ffffff',
+              padding: '8px 12px',
+              fontSize: '12px',
+              fontWeight: 800,
+            }}
+          >
+            COMPANY BANK DETAILS
+          </div>
+
+          <div
+            style={{
+              padding: '10px 12px',
+              minHeight: '105px',
+              fontSize: '9px',
+              lineHeight: 1.55,
+            }}
+          >
+            BANK NAME : {COMPANY.bankName}
+            <br />
+            BRANCH NAME : {COMPANY.branchName}
+            <br />
+            ACCOUNT NUMBER : {COMPANY.accountNumber}
+            <br />
+            ACCOUNT TYPE : {COMPANY.accountType}
+            <br />
+            IFSC CODE : {COMPANY.ifsc}
+          </div>
+        </div>
+      </div>
+
+
+      {/* ================= SIGNATURE ================= */}
+
+      <div
+        style={{
+          margin: '6px 18px 0',
+          border: '1px solid #B8C7D3',
+          textAlign: 'center',
+        }}
+      >
+        <div
+          style={{
+            background: '#123F67',
+            color: '#ffffff',
+            padding: '7px',
+            fontSize: '12px',
+            fontWeight: 800,
+          }}
+        >
+          AUTHORISED SIGNATURE
+        </div>
+
+        <div
+          style={{
+            padding: '10px',
+            height: '55px',
+            color: '#123F67',
+            fontSize: '9px',
+            fontWeight: 700,
+          }}
+        >
+          ______________________________
+          <br />
+          GNK NAVEEN INDUSTRIAL CATERERS &amp; MAINTAINANCE
+        </div>
+      </div>
+
+
+      {/* ================= BOTTOM BLUE / GOLD DESIGN ================= */}
+
+      <div
+        style={{
+          position: 'relative',
+          height: '35px',
+          marginTop: '6px',
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: '100%',
+            height: '28px',
+            background: '#123F67',
+            borderTopRightRadius: '80%',
+          }}
+        />
+
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '22px',
+            left: 0,
+            width: '100%',
+            height: '5px',
+            background: '#D9A441',
+            borderTopRightRadius: '80%',
+          }}
+        />
+      </div>
+
     </div>
   );
 }
