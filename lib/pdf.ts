@@ -783,60 +783,82 @@ function drawHousekeeping(
   /* =========================================================
      TOP HEADER
   ========================================================= */
+/* =========================================================
+   SAMPLE-STYLE TOP HEADER
+========================================================= */
 
-  // White page
-  doc.rect(0, 0, pageW, pageH).fill('#FFFFFF');
+// White background
+doc
+  .fillColor('#FFFFFF')
+  .rect(0, 0, pageW, pageH)
+  .fill();
 
-  // Top navy band
-  doc
-    .fillColor(navy)
-    .rect(0, 0, pageW, 105)
-    .fill();
+// Left white area
+doc
+  .fillColor('#FFFFFF')
+  .rect(0, 0, pageW * 0.52, 112)
+  .fill();
 
-  // Gold accent
-  doc
-    .fillColor(gold)
-    .rect(0, 101, pageW, 5)
-    .fill();
+// Main blue header on right
+doc
+  .fillColor(navy)
+  .moveTo(300, 0)
+  .lineTo(pageW, 0)
+  .lineTo(pageW, 112)
+  .lineTo(390, 112)
+  .curveTo(360, 95, 340, 70, 300, 0)
+  .fill();
 
-  // Existing GNK logo
-  const logoPath = path.join(
-    process.cwd(),
-    'public',
-    'gnk-header.png'
-  );
+// Gold accent curve
+doc
+  .fillColor(gold)
+  .moveTo(275, 0)
+  .lineTo(292, 0)
+  .curveTo(330, 55, 355, 82, 405, 103)
+  .lineTo(390, 112)
+  .curveTo(340, 91, 310, 55, 275, 0)
+  .fill();
 
-  if (fs.existsSync(logoPath)) {
-    doc.image(
-      logoPath,
-      x + 8,
-      12,
-      {
-        width: 270,
-        height: 75,
-      }
-    );
-  }
+// Logo
+const logoPath = path.join(
+  process.cwd(),
+  'public',
+  'gnk-header.png'
+);
 
-  // GST TAX INVOICE
-  text(
-    doc,
-    'GST TAX INVOICE',
-    330,
-    25,
-    235,
-    30,
+if (fs.existsSync(logoPath)) {
+  doc.image(
+    logoPath,
+    x + 8,
+    12,
     {
-      bold: true,
-      size: 21,
-      align: 'center',
+      width: 260,
+      height: 72,
     }
   );
+}
 
-  doc
-    .fillColor(gold)
-    .rect(400, 59, 135, 3)
-    .fill();
+// GST TAX INVOICE
+text(
+  doc,
+  'GST TAX INVOICE',
+  345,
+  25,
+  225,
+  30,
+  {
+    bold: true,
+    size: 20,
+    align: 'center',
+  }
+);
+
+// Gold underline
+doc
+  .fillColor(gold)
+  .rect(405, 60, 135, 3)
+  .fill();
+
 
   /* =========================================================
      COMPANY + INVOICE INFORMATION
