@@ -2787,3 +2787,84 @@ a {
     print-color-adjust: exact !important;
   }
 }
+
+
+/* =========================================================
+   PRINT / SAVE AS PDF
+   ONE PAGE A4 - MOBILE FRIENDLY
+   ========================================================= */
+
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    overflow: hidden !important;
+  }
+
+  /*
+     IMPORTANT:
+     Make the complete invoice fit INSIDE A4.
+  */
+
+  .paper,
+  .paper.hk {
+    width: 210mm !important;
+
+    /*
+       285mm instead of 297mm gives the browser
+       some safe space and prevents a second page.
+    */
+    height: 285mm !important;
+    min-height: 285mm !important;
+    max-height: 285mm !important;
+
+    margin: 0 auto !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+
+    box-shadow: none !important;
+    border: none !important;
+
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+
+    break-before: avoid !important;
+    break-after: avoid-page !important;
+    break-inside: avoid !important;
+
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /*
+     Preserve blue / gold / light-blue backgrounds
+     when saving as PDF.
+  */
+
+  .paper *,
+  .paper.hk * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
