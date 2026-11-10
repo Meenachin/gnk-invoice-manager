@@ -80,7 +80,12 @@ export default function Invoices() {
         : 'View and manage saved catering bills.'}
     </span>
   </div>
-
+<a
+  className="btn secondary"
+  href={`/api/invoices/export?type=${invoiceType}`}
+>
+  Download Excel
+</a>
   <Link
     className="btn"
     href={
