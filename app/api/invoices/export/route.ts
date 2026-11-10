@@ -29,13 +29,25 @@ function formatHeader(value: string) {
 function excelValue(value: any): any {
   if (value === null || value === undefined) return '';
 
+  // Remove time from date and timestamp values
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === 'string') {
+    // Example: 2026-11-10T10:30:45
+    // Result: 2026-11-10
+    if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+      return value.slice(0, 10);
+    }
+  }
+
   if (typeof value === 'object') {
     return JSON.stringify(value);
   }
 
   return value;
 }
-
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
